@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class FamilyTreeScreen extends StatelessWidget {
+  const FamilyTreeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -9,7 +11,11 @@ class FamilyTreeScreen extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'Ургийн мод',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
         centerTitle: true,
       ),
@@ -20,19 +26,20 @@ class FamilyTreeScreen extends StatelessWidget {
             children: [
               // Add Family Member Button
               ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Implement add family member functionality
-                },
+                onPressed: () {},
                 icon: const Icon(Icons.add),
                 label: const Text('Гэр бүлийн гишүүн нэмэх'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green[800],
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               // Family Tree Structure
               Container(
                 padding: const EdgeInsets.all(16),
@@ -110,4 +117,4 @@ class FamilyTreeScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
     );
   }
-} 
+}
