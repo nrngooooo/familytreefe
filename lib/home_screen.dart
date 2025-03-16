@@ -10,14 +10,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
-    );
+    return MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen());
   }
 }
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -29,9 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _selectedIndex == 1 
-          ? FamilyTreeScreen()
-          : _buildMembersScreen(),
+      body: _selectedIndex == 1 ? FamilyTreeScreen() : _buildMembersScreen(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         backgroundColor: Colors.grey[300],
@@ -51,10 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.account_tree),
             label: 'Ургийн мод',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Профайл',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профайл'),
         ],
       ),
     );
@@ -67,7 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         title: const Text(
           'Овгийн гишүүд',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
         centerTitle: true,
       ),
@@ -99,12 +97,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green[800],
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text('Хайх', style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    'Хайх',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
@@ -117,7 +121,10 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: members.length,
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 5,
+                  ),
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -137,7 +144,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Text(
                               members[index],
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const Row(
                               children: [
