@@ -1,6 +1,6 @@
-import 'package:familytreefe/login.dart';
 import 'package:flutter/material.dart';
-import 'package:familytreefe/api/api_service.dart'; // Import the AuthService
+import 'package:familytreefe/api/api_service.dart';
+import 'package:familytreefe/login.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,6 +13,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _rePasswordController = TextEditingController();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -23,10 +24,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String username = _usernameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
+    String repassword = _rePasswordController.text;
 
-    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+    if (username.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        repassword.isEmpty) {
       setState(() {
         _errorMessage = 'Түгээмэл талбаруудыг бөглөнө үү';
+      });
+      return;
+    }
+
+    if (password != repassword) {
+      setState(() {
+        _errorMessage = 'Нууц үг хоорондоо тохирохгүй байна';
       });
       return;
     }
@@ -36,14 +48,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _errorMessage = null;
     });
 
-    bool success = await _authService.register(username, email, password);
+    bool success = await _authService.register(
+      username,
+      email,
+      password,
+      repassword,
+    );
 
     setState(() {
       _isLoading = false;
     });
 
     if (success) {
-      // Navigate to home screen after successful registration
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()));
@@ -127,6 +143,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.lock, color: Colors.black),
                     hintText: 'Нууц үг',
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // Re-enter Password Input
+              Container(
+                width: 300,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: _rePasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.lock, color: Colors.black),
+                    hintText: 'Нууц үг давтах',
                     border: InputBorder.none,
                   ),
                 ),

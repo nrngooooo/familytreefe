@@ -11,7 +11,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController usernameController =
+      TextEditingController(); // Changed to usernameController
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   String errorMessage = '';
@@ -26,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final authService = AuthService();
 
     bool success = await authService.login(
-      emailController.text,
+      usernameController.text, // Using usernameController now
       passwordController.text,
     );
 
@@ -66,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
               CircleAvatar(radius: 60, backgroundImage: AssetImage('logo.jpg')),
               const SizedBox(height: 40),
 
-              // Email Input
+              // Username Input
               Container(
                 width: 300,
                 padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -75,10 +76,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TextField(
-                  controller: emailController,
+                  controller:
+                      usernameController, // Using usernameController here
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.email, color: Colors.black),
-                    hintText: 'Имэйл',
+                    prefixIcon: Icon(Icons.person, color: Colors.black),
+                    hintText:
+                        'Хэрэглэгчийн нэр', // Updated hint text to Username
                     border: InputBorder.none,
                   ),
                 ),
@@ -121,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       child: const Text(
-                        'нэвтрэх',
+                        'Нэвтрэх',
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
