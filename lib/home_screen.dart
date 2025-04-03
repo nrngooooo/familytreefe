@@ -1,3 +1,4 @@
+import 'package:familytreefe/profile.dart';
 import 'package:flutter/material.dart';
 import 'family_tree_screen.dart';
 
@@ -28,7 +29,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _selectedIndex == 1 ? FamilyTreeScreen() : _buildMembersScreen(),
+      body:
+          _selectedIndex == 1
+              ? FamilyTreeScreen()
+              : (_selectedIndex == 2 ? ProfileScreen() : _buildMembersScreen()),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         backgroundColor: Colors.grey[300],

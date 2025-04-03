@@ -25,19 +25,23 @@ class AuthService {
         "repassword": repassword,
       }),
     );
-    print('Response Status: ${response.statusCode}');
-    print('Response Body: ${response.body}');
-    if (response.statusCode == 201) {
-      print('Бүртгэл амжилттай!');
-    } else if (response.statusCode == 400) {
-      var errorData = jsonDecode(response.body);
-      print(errorData['error'] ?? 'Бүртгэл амжилтгүй. Давтан оролдоно уу');
-      return false;
-    } else {
-      print('Бүртгэлийн үйл явцад алдаа гарлаа. Дахин оролдоно уу');
-      return false;
+    try {
+      print('Response Status: ${response.statusCode}');
+      print('Response Body: ${json.decode(utf8.decode(response.bodyBytes))}');
+      // Check if the response is successful
+      if (response.statusCode == 201) {
+        print('Бүртгэл амжилттай!');
+        return true; // Registration successful
+      } else if (response.statusCode == 400) {
+        var errorData = jsonDecode(response.body);
+        print(errorData['error'] ?? 'Бүртгэл амжилтгүй. Давтан оролдоно уу');
+        return false;
+      }
+    } catch (e) {
+      print("Бүртгэлийн үйл явцад алдаа гарлаа: $e");
+      return false; // Handle any connection or other issues
     }
-    return false; // Ensure all code paths return a value
+    return false; // Ensure a return value in all cases
   }
 
   // Login method
@@ -49,7 +53,8 @@ class AuthService {
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      print('Response Status: ${response.statusCode}');
       print("Logged in! Element ID: ${data['element_id']}");
       _token = data['token']; // Store the token after successful login
       return true; // Login successful
@@ -62,9 +67,5 @@ class AuthService {
   // Logout method
   void logout() {
     _token = null; // Clear the stored token
-
-    // Optionally, you can redirect the user to the login screen here
-    // For example, using Navigator:
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 }

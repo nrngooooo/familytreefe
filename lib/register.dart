@@ -31,14 +31,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password.isEmpty ||
         repassword.isEmpty) {
       setState(() {
-        _errorMessage = 'Түгээмэл талбаруудыг бөглөнө үү';
+        _errorMessage = 'Бүх талбаруудыг бөглөнө үү';
       });
       return;
     }
 
     if (password != repassword) {
       setState(() {
-        _errorMessage = 'Нууц үг хоорондоо тохирохгүй байна';
+        _errorMessage = 'Нууц үг таарахгүй байна';
       });
       return;
     }
@@ -48,24 +48,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _errorMessage = null;
     });
 
-    bool success = await _authService.register(
-      username,
-      email,
-      password,
-      repassword,
-    );
+    try {
+      bool success = await _authService.register(
+        username,
+        email,
+        password,
+        repassword,
+      );
 
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (success) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()));
-    } else {
+      if (success) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      } else {
+        setState(() {
+          _errorMessage = 'Бүртгэл амжилтгүй. Давтан оролдоно уу';
+        });
+      }
+    } catch (e) {
+      print("Server Response: $e"); // Debug the error
       setState(() {
-        _errorMessage = 'Бүртгэл амжилтгүй. Давтан оролдоно уу';
+        _errorMessage = 'Серверийн алдаа: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
       });
     }
   }
