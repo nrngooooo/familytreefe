@@ -4,7 +4,9 @@ import 'api/api_service.dart'; // Import the AuthService
 import 'register.dart'; // Import the RegisterScreen
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final AuthService authService;
+
+  const LoginScreen({super.key, required this.authService});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -24,9 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
       errorMessage = ''; // Clear any previous error messages
     });
 
-    final authService = AuthService();
-
-    bool success = await authService.login(
+    bool success = await widget.authService.login(
       usernameController.text, // Using usernameController now
       passwordController.text,
     );
@@ -36,9 +36,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (success) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => HomeScreen()));
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(authService: widget.authService),
+          ),
+        );
+      }
     } else {
       setState(() {
         errorMessage = 'Нэвтрэхэд алдаа гарлаа. Шалгана уу.';
@@ -150,7 +154,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Navigate to Register Screen
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => RegisterScreen(),
+                          builder:
+                              (context) => RegisterScreen(
+                                authService: widget.authService,
+                              ),
                         ),
                       );
                     },

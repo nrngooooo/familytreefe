@@ -1,22 +1,12 @@
 import 'package:familytreefe/profile.dart';
 import 'package:flutter/material.dart';
 import 'family_tree_screen.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen());
-  }
-}
+import 'api/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final AuthService authService;
+
+  const HomeScreen({super.key, required this.authService});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -32,7 +22,9 @@ class _HomeScreenState extends State<HomeScreen> {
       body:
           _selectedIndex == 1
               ? FamilyTreeScreen()
-              : (_selectedIndex == 2 ? ProfileScreen() : _buildMembersScreen()),
+              : (_selectedIndex == 2
+                  ? ProfileScreen(authService: widget.authService)
+                  : _buildMembersScreen()),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         backgroundColor: Colors.grey[300],

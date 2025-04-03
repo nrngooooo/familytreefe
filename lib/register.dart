@@ -3,7 +3,9 @@ import 'package:familytreefe/api/api_service.dart';
 import 'package:familytreefe/login.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  final AuthService authService;
+
+  const RegisterScreen({super.key, required this.authService});
 
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -17,8 +19,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _isLoading = false;
   String? _errorMessage;
-
-  final AuthService _authService = AuthService(); // Initialize AuthService
 
   Future<void> _register() async {
     String username = _usernameController.text;
@@ -49,7 +49,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      bool success = await _authService.register(
+      bool success = await widget.authService.register(
         username,
         email,
         password,
@@ -57,9 +57,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (success) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => LoginScreen()),
-        );
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder:
+                  (context) => LoginScreen(authService: widget.authService),
+            ),
+          );
+        }
       } else {
         setState(() {
           _errorMessage = 'Бүртгэл амжилтгүй. Давтан оролдоно уу';

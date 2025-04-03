@@ -1,15 +1,32 @@
-import 'package:familytreefe/login.dart';
 import 'package:flutter/material.dart';
+import 'login.dart';
+import 'api/api_service.dart';
+import 'home_screen.dart';
+import 'register.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final authService = AuthService();
+  await authService.init();
+  runApp(MyApp(authService: authService));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthService authService;
+
+  const MyApp({super.key, required this.authService});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: LoginScreen());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home:
+          authService.isLoggedIn()
+              ? HomeScreen(authService: authService)
+              : LoginScreen(authService: authService),
+      routes: {
+        '/register': (context) => RegisterScreen(authService: authService),
+      },
+    );
   }
 }
