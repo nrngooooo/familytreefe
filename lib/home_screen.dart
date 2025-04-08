@@ -23,7 +23,10 @@ class _HomeScreenState extends State<HomeScreen> {
           _selectedIndex == 1
               ? FamilyTreeScreen()
               : (_selectedIndex == 2
-                  ? ProfileScreen(authService: widget.authService)
+                  ? ProfileScreen(
+                    authService: widget.authService,
+                    uid: widget.authService.userInfo?['uid'] ?? '',
+                  )
                   : _buildMembersScreen()),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -37,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
+            icon: Icon(Icons.family_restroom),
             label: 'Овгийн гишүүд',
           ),
           BottomNavigationBarItem(

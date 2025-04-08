@@ -118,9 +118,13 @@ class AuthService {
           // Create user info object
           final userInfo = {
             'username': username,
-            'element_id': data['element_id'],
+            'uid': data['uid'],
             'email': data['email'] ?? '',
           };
+
+          if (kDebugMode) {
+            print("Saving user info: $userInfo");
+          }
 
           await _saveUserData(data['token'], userInfo);
           return true;
@@ -133,7 +137,9 @@ class AuthService {
       } else {
         if (kDebugMode) {
           print("Login failed with status: ${response.statusCode}");
-          print("Response body: ${response.body}");
+          print(
+            "Response body: ${json.decode(utf8.decode(response.bodyBytes))}",
+          );
         }
         return false;
       }
@@ -148,5 +154,42 @@ class AuthService {
   // Logout method
   Future<void> logout() async {
     await clearUserData();
+  }
+
+  Future<Map<String, dynamic>?> fetchProfile(String uid) async {
+    if (uid.isEmpty) {
+      print('Error: Empty UID provided to fetchProfile');
+      return null;
+    }
+
+    if (_token == null || _token!.isEmpty) {
+      print('Error: No authentication token available');
+      return null;
+    }
+
+    print('Fetching profile from URL: $baseUrl/profile/$uid/');
+    final url = Uri.parse("$baseUrl/profile/$uid/");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token", // Ensure token is correct here
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final profileData = json.decode(utf8.decode(response.bodyBytes));
+        return profileData;
+      } else {
+        print("Failed to fetch profile: ${response.statusCode}");
+        print("Response body: ${utf8.decode(response.bodyBytes)}");
+        return null; // Handle failure
+      }
+    } catch (e) {
+      print("Profile fetch error: $e");
+      return null;
+    }
   }
 }
