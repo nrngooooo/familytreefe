@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/family_member.dart';
 
 class AuthService {
   final String baseUrl = "http://127.0.0.1:8000/api";
@@ -245,6 +246,178 @@ class AuthService {
     } catch (e) {
       print("Create/update person error: $e");
       return false;
+    }
+  }
+
+  Future<bool> deleteUser(String uid) async {
+    if (_token == null || _token!.isEmpty) {
+      print('Error: No authentication token available');
+      return false;
+    }
+
+    try {
+      final response = await http.delete(
+        Uri.parse("$baseUrl/profile/$uid/delete/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        await clearUserData();
+        return true;
+      } else {
+        print("Failed to delete user: ${response.statusCode}");
+        print("Response body: ${utf8.decode(response.bodyBytes)}");
+        return false;
+      }
+    } catch (e) {
+      print("Delete user error: $e");
+      return false;
+    }
+  }
+
+  Future<List<FamilyMember>> getFamilyMembers() async {
+    if (_token == null || _token!.isEmpty) {
+      print('Error: No authentication token available');
+      return [];
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/person/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        return data.map((json) => FamilyMember.fromJson(json)).toList();
+      } else {
+        print("Failed to load family members: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      print("Error fetching family members: $e");
+      return [];
+    }
+  }
+
+  Future<bool> createFamilyMember(FamilyMember member) async {
+    if (_token == null || _token!.isEmpty) {
+      print('Error: No authentication token available');
+      return false;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/person/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+        body: jsonEncode(member.toJson()),
+      );
+
+      if (response.statusCode == 201) {
+        return true;
+      } else {
+        print("Failed to create family member: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      print("Error creating family member: $e");
+      return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getPlaces() async {
+    if (_token == null || _token!.isEmpty) {
+      print('Error: No authentication token available');
+      return [];
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/place/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(
+          json.decode(utf8.decode(response.bodyBytes)),
+        );
+      } else {
+        print("Failed to load places: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      print("Error fetching places: $e");
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUye() async {
+    if (_token == null || _token!.isEmpty) {
+      print('Error: No authentication token available');
+      return [];
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/uye/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(
+          json.decode(utf8.decode(response.bodyBytes)),
+        );
+      } else {
+        print("Failed to load uye: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      print("Error fetching uye: $e");
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUrgiinOvog() async {
+    if (_token == null || _token!.isEmpty) {
+      print('Error: No authentication token available');
+      return [];
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/urgiinovog/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(
+          json.decode(utf8.decode(response.bodyBytes)),
+        );
+      } else {
+        print("Failed to load urgiin ovog: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      print("Error fetching urgiin ovog: $e");
+      return [];
     }
   }
 }

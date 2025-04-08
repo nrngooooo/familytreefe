@@ -25,20 +25,20 @@ class FamilyTreeScreen extends StatelessWidget {
           child: Column(
             children: [
               // Add Family Member Button
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add),
-                label: const Text('Гэр бүлийн гишүүн нэмэх'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[800],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
+              // ElevatedButton.icon(
+              //   onPressed: () {},
+              //   icon: const Icon(Icons.add),
+              //   label: const Text('Гэр бүлийн гишүүн нэмэх'),
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.green[800],
+              //     foregroundColor: Colors.white,
+              //     padding: const EdgeInsets.symmetric(
+              //       horizontal: 20,
+              //       vertical: 12,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 20),
 
               // Family Tree Structure
               Container(

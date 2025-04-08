@@ -71,7 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () async {
                       await widget.authService.logout();
                       if (mounted) {
-                        Navigator.of(context).pushReplacementNamed('/login');
+                        Navigator.of(context).pop();
                       }
                     },
                   ),
@@ -219,6 +219,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16.0),
                       child: _buildProfileInfo(),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Бүртгэл устгах'),
+                              content: const Text(
+                                'Та өөрийн бүртгэлийг устгахдаа итгэлтэй байна уу? Энэ үйлдлийг буцаах боломжгүй.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: const Text('Болих'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: const Text(
+                                    'Устгах',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  onPressed: () async {
+                                    Navigator.of(context).pop();
+                                    final success = await widget.authService
+                                        .deleteUser(widget.uid);
+                                    if (success && mounted) {
+                                      Navigator.of(
+                                        context,
+                                      ).pushReplacementNamed('/login');
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Бүртгэл устгахад алдаа гарлаа',
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                      child: const Text(
+                        'Бүртгэл устгах',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
                     ),
                   ),
                 ],
