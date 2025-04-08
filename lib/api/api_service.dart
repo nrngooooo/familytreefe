@@ -153,6 +153,25 @@ class AuthService {
 
   // Logout method
   Future<void> logout() async {
+    if (_token != null) {
+      try {
+        final response = await http.post(
+          Uri.parse("$baseUrl/logout/"),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Token $_token",
+          },
+        );
+
+        if (response.statusCode == 200) {
+          await clearUserData();
+        } else {
+          print("Logout failed with status: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Logout error: $e");
+      }
+    }
     await clearUserData();
   }
 

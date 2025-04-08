@@ -1,6 +1,5 @@
 import 'package:familytreefe/api/api_service.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'edit_profile_page.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -64,6 +63,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: const EdgeInsets.symmetric(vertical: 32.0),
           child: Column(
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.logout, color: Colors.white),
+                    onPressed: () async {
+                      await widget.authService.logout();
+                      if (mounted) {
+                        Navigator.of(context).pushReplacementNamed('/login');
+                      }
+                    },
+                  ),
+                ],
+              ),
               CircleAvatar(
                 radius: 50,
                 backgroundColor: Colors.white,
