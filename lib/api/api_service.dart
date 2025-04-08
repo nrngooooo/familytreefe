@@ -192,4 +192,40 @@ class AuthService {
       return null;
     }
   }
+
+  Future<bool> createOrUpdatePerson(Map<String, dynamic> personData) async {
+    if (_token == null || _token!.isEmpty) {
+      print('Error: No authentication token available');
+      return false;
+    }
+
+    if (_userInfo == null || _userInfo!['uid'] == null) {
+      print('Error: No user info available');
+      return false;
+    }
+
+    final url = Uri.parse("$baseUrl/profile/${_userInfo!['uid']}/");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+        body: jsonEncode(personData),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        print("Failed to create/update person: ${response.statusCode}");
+        print("Response body: ${utf8.decode(response.bodyBytes)}");
+        return false;
+      }
+    } catch (e) {
+      print("Create/update person error: $e");
+      return false;
+    }
+  }
 }
