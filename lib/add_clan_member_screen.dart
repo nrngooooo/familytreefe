@@ -343,14 +343,34 @@ class _AddClanMemberScreenState extends State<AddClanMemberScreen> {
 
         final success = await widget.authService.createFamilyMember(member);
         if (success && mounted) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Овгийн гишүүн амжилттай нэмэгдлээ!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Call the callback to refresh the list
           widget.onMemberAdded();
+
+          // Navigate back to the previous screen
           Navigator.of(context).pop();
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Овгийн гишүүн нэмэхэд алдаа гарлаа!'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error creating member: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Алдаа: $e'), backgroundColor: Colors.red),
+          );
         }
       }
     }

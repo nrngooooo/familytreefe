@@ -313,9 +313,23 @@ class AuthService {
       return [];
     }
 
+    if (_userInfo == null || _userInfo!['uid'] == null) {
+      if (kDebugMode) {
+        print('Error: No user info available');
+      }
+      return [];
+    }
+
     try {
+      // First get the user's profile to get their person
+      final profile = await fetchProfile(_userInfo!['uid']);
+      if (profile == null) {
+        return [];
+      }
+
+      // Get family members using the user's UID directly
       final response = await http.get(
-        Uri.parse("$baseUrl/person/"),
+        Uri.parse("$baseUrl/family/${_userInfo!['uid']}/list/"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Token $_token",
@@ -323,11 +337,62 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
-        return data.map((json) => FamilyMember.fromJson(json)).toList();
+        final Map<String, dynamic> data = json.decode(
+          utf8.decode(response.bodyBytes),
+        );
+        List<FamilyMember> members = [];
+
+        // Add the user's own information first
+        if (profile['person'] != null) {
+          members.add(
+            FamilyMember(
+              fromPersonId: _userInfo!['uid'],
+              relationshipType: 'ӨӨРӨӨ',
+              name: profile['person']['name'],
+              lastname: profile['person']['lastname'],
+              gender: profile['person']['gender'],
+              birthdate: DateTime.parse(profile['person']['birthdate']),
+              diedate:
+                  profile['person']['diedate'] != null
+                      ? DateTime.parse(profile['person']['diedate'])
+                      : null,
+              biography: profile['person']['biography'],
+              uyeId: profile['person']['generation']?['uid'],
+              placeId: profile['person']['birthplace']?['uid'],
+              urgiinOvogId: profile['person']['urgiinovog']?['uid'],
+            ),
+          );
+        }
+
+        // Convert all family members to a flat list
+        data.forEach((relationship, people) {
+          for (var person in people) {
+            members.add(
+              FamilyMember(
+                fromPersonId: _userInfo!['uid'],
+                relationshipType: relationship,
+                name: person['name'],
+                lastname: person['lastname'],
+                gender: person['gender'],
+                birthdate: DateTime.parse(person['birthdate']),
+                diedate:
+                    person['diedate'] != null
+                        ? DateTime.parse(person['diedate'])
+                        : null,
+                biography: person['biography'],
+                uyeId: person['generation']?['uid'],
+                placeId: person['birthplace']?['uid'],
+                urgiinOvogId: person['urgiinovog']?['uid'],
+              ),
+            );
+          }
+        });
+
+        return members;
       } else {
         if (kDebugMode) {
           print("Failed to load family members: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
         }
         return [];
       }
@@ -354,21 +419,25 @@ class AuthService {
           "Content-Type": "application/json",
           "Authorization": "Token $_token",
         },
-        body: jsonEncode(member.toJson()),
+        body: json.encode(member.toJson()),
       );
 
-      if (response.statusCode == 201) {
+      if (kDebugMode) {
+        print('Response status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
         return true;
       } else {
         if (kDebugMode) {
-          print("Failed to create family member: ${response.statusCode}");
-          print("Response body: ${utf8.decode(response.bodyBytes)}");
+          print('Error response: ${response.body}');
         }
         return false;
       }
     } catch (e) {
       if (kDebugMode) {
-        print("Error creating family member: $e");
+        print('Error creating family member: $e');
       }
       return false;
     }
