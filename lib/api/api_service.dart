@@ -349,7 +349,7 @@ class AuthService {
 
     try {
       final response = await http.post(
-        Uri.parse("$baseUrl/person/"),
+        Uri.parse("$baseUrl/family/add/"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Token $_token",
@@ -362,6 +362,7 @@ class AuthService {
       } else {
         if (kDebugMode) {
           print("Failed to create family member: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
         }
         return false;
       }
@@ -383,7 +384,7 @@ class AuthService {
 
     try {
       final response = await http.get(
-        Uri.parse("$baseUrl/place/"),
+        Uri.parse("$baseUrl/places/"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Token $_token",
@@ -391,12 +392,20 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(
-          json.decode(utf8.decode(response.bodyBytes)),
-        );
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        return data
+            .map(
+              (item) => {
+                'uid': item['uid'],
+                'name': item['name'],
+                'country': item['country'],
+              },
+            )
+            .toList();
       } else {
         if (kDebugMode) {
           print("Failed to load places: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
         }
         return [];
       }
@@ -426,12 +435,20 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(
-          json.decode(utf8.decode(response.bodyBytes)),
-        );
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        return data
+            .map(
+              (item) => {
+                'uid': item['uid'],
+                'uyname': item['uyname'],
+                'level': item['level'],
+              },
+            )
+            .toList();
       } else {
         if (kDebugMode) {
           print("Failed to load uye: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
         }
         return [];
       }
@@ -461,18 +478,59 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(
-          json.decode(utf8.decode(response.bodyBytes)),
-        );
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        return data
+            .map(
+              (item) => {'uid': item['uid'], 'urgiinovog': item['urgiinovog']},
+            )
+            .toList();
       } else {
         if (kDebugMode) {
           print("Failed to load urgiin ovog: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
         }
         return [];
       }
     } catch (e) {
       if (kDebugMode) {
         print("Error fetching urgiin ovog: $e");
+      }
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getRelationshipTypes() async {
+    if (_token == null || _token!.isEmpty) {
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
+      return [];
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/relationship-types/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        return data
+            .map((item) => {'type': item['type'], 'label': item['label']})
+            .toList();
+      } else {
+        if (kDebugMode) {
+          print("Failed to load relationship types: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
+        }
+        return [];
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error fetching relationship types: $e");
       }
       return [];
     }

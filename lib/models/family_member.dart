@@ -1,54 +1,61 @@
+import 'package:intl/intl.dart';
+
 class FamilyMember {
+  final String fromPersonId;
+  final String relationshipType;
   final String name;
   final String? lastname;
   final String gender;
   final DateTime birthdate;
   final DateTime? diedate;
-  final String? imageUrl;
   final String? biography;
-  final String? placeId;
   final String? uyeId;
+  final String? placeId;
   final String? urgiinOvogId;
 
   FamilyMember({
+    required this.fromPersonId,
+    required this.relationshipType,
     required this.name,
     this.lastname,
     required this.gender,
     required this.birthdate,
     this.diedate,
-    this.imageUrl,
     this.biography,
-    this.placeId,
     this.uyeId,
+    this.placeId,
     this.urgiinOvogId,
   });
 
   Map<String, dynamic> toJson() {
     return {
+      'from_person_id': fromPersonId,
+      'relationship_type': relationshipType,
       'name': name,
       'lastname': lastname,
       'gender': gender,
-      'birthdate': birthdate.toIso8601String(),
-      'diedate': diedate?.toIso8601String(),
-      'image_url': imageUrl,
+      'birthdate': DateFormat('yyyy-MM-dd').format(birthdate),
+      'diedate':
+          diedate != null ? DateFormat('yyyy-MM-dd').format(diedate!) : null,
       'biography': biography,
-      'place_id': placeId,
       'uye_id': uyeId,
+      'place_id': placeId,
       'urgiin_ovog_id': urgiinOvogId,
     };
   }
 
   factory FamilyMember.fromJson(Map<String, dynamic> json) {
     return FamilyMember(
-      name: json['name'],
+      fromPersonId: json['from_person_id'] ?? '',
+      relationshipType: json['relationship_type'] ?? '',
+      name: json['name'] ?? '',
       lastname: json['lastname'],
-      gender: json['gender'],
+      gender: json['gender'] ?? 'Эр',
       birthdate: DateTime.parse(json['birthdate']),
       diedate: json['diedate'] != null ? DateTime.parse(json['diedate']) : null,
-      imageUrl: json['image_url'],
       biography: json['biography'],
-      placeId: json['place_id'],
       uyeId: json['uye_id'],
+      placeId: json['place_id'],
       urgiinOvogId: json['urgiin_ovog_id'],
     );
   }
