@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:familytreefe/api/api_service.dart';
 import 'package:familytreefe/login.dart';
@@ -71,7 +72,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
       }
     } catch (e) {
-      print("Server Response: $e"); // Debug the error
+      if (kDebugMode) {
+        print("Server Response: $e");
+      } // Debug the error
       setState(() {
         _errorMessage = 'Серверийн алдаа: $e';
       });

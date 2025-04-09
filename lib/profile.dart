@@ -1,4 +1,5 @@
 import 'package:familytreefe/api/api_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'edit_profile_page.dart';
 
@@ -35,7 +36,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isLoading = false;
         });
       } catch (e) {
-        print("Error fetching profile: $e");
+        if (kDebugMode) {
+          print("Error fetching profile: $e");
+        }
         setState(() {
           isLoading = false;
           profile = null;

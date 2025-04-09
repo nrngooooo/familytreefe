@@ -167,10 +167,14 @@ class AuthService {
         if (response.statusCode == 200) {
           await clearUserData();
         } else {
-          print("Logout failed with status: ${response.statusCode}");
+          if (kDebugMode) {
+            print("Logout failed with status: ${response.statusCode}");
+          }
         }
       } catch (e) {
-        print("Logout error: $e");
+        if (kDebugMode) {
+          print("Logout error: $e");
+        }
       }
     }
     await clearUserData();
@@ -178,16 +182,21 @@ class AuthService {
 
   Future<Map<String, dynamic>?> fetchProfile(String uid) async {
     if (uid.isEmpty) {
-      print('Error: Empty UID provided to fetchProfile');
+      if (kDebugMode) {
+        print('Error: Empty UID provided to fetchProfile');
+      }
       return null;
     }
 
     if (_token == null || _token!.isEmpty) {
-      print('Error: No authentication token available');
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
       return null;
     }
-
-    print('Fetching profile from URL: $baseUrl/profile/$uid/');
+    if (kDebugMode) {
+      print('Fetching profile from URL: $baseUrl/profile/$uid/');
+    }
     final url = Uri.parse("$baseUrl/profile/$uid/");
 
     try {
@@ -203,24 +212,32 @@ class AuthService {
         final profileData = json.decode(utf8.decode(response.bodyBytes));
         return profileData;
       } else {
-        print("Failed to fetch profile: ${response.statusCode}");
-        print("Response body: ${utf8.decode(response.bodyBytes)}");
+        if (kDebugMode) {
+          print("Failed to fetch profile: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
+        }
         return null; // Handle failure
       }
     } catch (e) {
-      print("Profile fetch error: $e");
+      if (kDebugMode) {
+        print("Profile fetch error: $e");
+      }
       return null;
     }
   }
 
   Future<bool> createOrUpdatePerson(Map<String, dynamic> personData) async {
     if (_token == null || _token!.isEmpty) {
-      print('Error: No authentication token available');
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
       return false;
     }
 
     if (_userInfo == null || _userInfo!['uid'] == null) {
-      print('Error: No user info available');
+      if (kDebugMode) {
+        print('Error: No user info available');
+      }
       return false;
     }
 
@@ -239,19 +256,25 @@ class AuthService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       } else {
-        print("Failed to create/update person: ${response.statusCode}");
-        print("Response body: ${utf8.decode(response.bodyBytes)}");
+        if (kDebugMode) {
+          print("Failed to create/update person: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
+        }
         return false;
       }
     } catch (e) {
-      print("Create/update person error: $e");
+      if (kDebugMode) {
+        print("Create/update person error: $e");
+      }
       return false;
     }
   }
 
   Future<bool> deleteUser(String uid) async {
     if (_token == null || _token!.isEmpty) {
-      print('Error: No authentication token available');
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
       return false;
     }
 
@@ -268,19 +291,25 @@ class AuthService {
         await clearUserData();
         return true;
       } else {
-        print("Failed to delete user: ${response.statusCode}");
-        print("Response body: ${utf8.decode(response.bodyBytes)}");
+        if (kDebugMode) {
+          print("Failed to delete user: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
+        }
         return false;
       }
     } catch (e) {
-      print("Delete user error: $e");
+      if (kDebugMode) {
+        print("Delete user error: $e");
+      }
       return false;
     }
   }
 
   Future<List<FamilyMember>> getFamilyMembers() async {
     if (_token == null || _token!.isEmpty) {
-      print('Error: No authentication token available');
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
       return [];
     }
 
@@ -297,18 +326,24 @@ class AuthService {
         final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
         return data.map((json) => FamilyMember.fromJson(json)).toList();
       } else {
-        print("Failed to load family members: ${response.statusCode}");
+        if (kDebugMode) {
+          print("Failed to load family members: ${response.statusCode}");
+        }
         return [];
       }
     } catch (e) {
-      print("Error fetching family members: $e");
+      if (kDebugMode) {
+        print("Error fetching family members: $e");
+      }
       return [];
     }
   }
 
   Future<bool> createFamilyMember(FamilyMember member) async {
     if (_token == null || _token!.isEmpty) {
-      print('Error: No authentication token available');
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
       return false;
     }
 
@@ -325,18 +360,24 @@ class AuthService {
       if (response.statusCode == 201) {
         return true;
       } else {
-        print("Failed to create family member: ${response.statusCode}");
+        if (kDebugMode) {
+          print("Failed to create family member: ${response.statusCode}");
+        }
         return false;
       }
     } catch (e) {
-      print("Error creating family member: $e");
+      if (kDebugMode) {
+        print("Error creating family member: $e");
+      }
       return false;
     }
   }
 
   Future<List<Map<String, dynamic>>> getPlaces() async {
     if (_token == null || _token!.isEmpty) {
-      print('Error: No authentication token available');
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
       return [];
     }
 
@@ -354,18 +395,24 @@ class AuthService {
           json.decode(utf8.decode(response.bodyBytes)),
         );
       } else {
-        print("Failed to load places: ${response.statusCode}");
+        if (kDebugMode) {
+          print("Failed to load places: ${response.statusCode}");
+        }
         return [];
       }
     } catch (e) {
-      print("Error fetching places: $e");
+      if (kDebugMode) {
+        print("Error fetching places: $e");
+      }
       return [];
     }
   }
 
   Future<List<Map<String, dynamic>>> getUye() async {
     if (_token == null || _token!.isEmpty) {
-      print('Error: No authentication token available');
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
       return [];
     }
 
@@ -383,18 +430,24 @@ class AuthService {
           json.decode(utf8.decode(response.bodyBytes)),
         );
       } else {
-        print("Failed to load uye: ${response.statusCode}");
+        if (kDebugMode) {
+          print("Failed to load uye: ${response.statusCode}");
+        }
         return [];
       }
     } catch (e) {
-      print("Error fetching uye: $e");
+      if (kDebugMode) {
+        print("Error fetching uye: $e");
+      }
       return [];
     }
   }
 
   Future<List<Map<String, dynamic>>> getUrgiinOvog() async {
     if (_token == null || _token!.isEmpty) {
-      print('Error: No authentication token available');
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
       return [];
     }
 
@@ -412,11 +465,15 @@ class AuthService {
           json.decode(utf8.decode(response.bodyBytes)),
         );
       } else {
-        print("Failed to load urgiin ovog: ${response.statusCode}");
+        if (kDebugMode) {
+          print("Failed to load urgiin ovog: ${response.statusCode}");
+        }
         return [];
       }
     } catch (e) {
-      print("Error fetching urgiin ovog: $e");
+      if (kDebugMode) {
+        print("Error fetching urgiin ovog: $e");
+      }
       return [];
     }
   }
