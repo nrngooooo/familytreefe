@@ -74,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () async {
                       await widget.authService.logout();
                       if (mounted) {
-                        Navigator.of(context).pop();
+                        Navigator.pushReplacementNamed(context, '/login');
                       }
                     },
                   ),

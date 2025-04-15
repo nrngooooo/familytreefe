@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body:
           _selectedIndex == 1
-              ? FamilyTreeScreen()
+              ? FamilyTreeScreen(authService: widget.authService)
               : (_selectedIndex == 2
                   ? ProfileScreen(
                     authService: widget.authService,

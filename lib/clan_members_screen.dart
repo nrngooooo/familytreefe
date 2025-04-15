@@ -23,7 +23,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
   void initState() {
     super.initState();
     _loadFamilyMembers();
-    _searchController.addListener(_filterMembers);
+    _searchController.addListener(_debounceFilterMembers);
   }
 
   @override
@@ -52,17 +52,21 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
     }
   }
 
+  void _debounceFilterMembers() {
+    // Apply debouncing logic to avoid firing immediately on every character typed
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _filterMembers();
+    });
+  }
+
   void _filterMembers() {
     final query = _searchController.text.toLowerCase();
     setState(() {
       filteredMembers =
-          members
-              .where(
-                (member) =>
-                    member.name.toLowerCase().contains(query) ||
-                    (member.lastname?.toLowerCase().contains(query) ?? false),
-              )
-              .toList();
+          members.where((member) {
+            return member.name.toLowerCase().contains(query) ||
+                (member.lastname?.toLowerCase().contains(query) ?? false);
+          }).toList();
     });
   }
 
@@ -134,33 +138,12 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            _filterMembers();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green[800],
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Хайх',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
                       ],
                     ),
                   ),
-
                   // Members List
                   Expanded(
-                    child: ListView.builder(
+                    child: ListView.separated(
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       itemCount: filteredMembers.length,
                       itemBuilder: (context, index) {
@@ -207,6 +190,9 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                             ),
                           ),
                         );
+                      },
+                      separatorBuilder: (context, index) {
+                        return const Divider();
                       },
                     ),
                   ),

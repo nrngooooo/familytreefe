@@ -11,6 +11,9 @@ class AuthService {
   static const String _tokenKey = 'auth_token';
   static const String _userInfoKey = 'user_info';
 
+  // Getter for token
+  String? get token => _token;
+
   // Initialize shared preferences and load token
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -316,15 +319,27 @@ class AuthService {
     if (_userInfo == null || _userInfo!['uid'] == null) {
       if (kDebugMode) {
         print('Error: No user info available');
+        print('User info: $_userInfo');
       }
       return [];
     }
 
     try {
+      if (kDebugMode) {
+        print('Fetching family members for user: ${_userInfo!['uid']}');
+      }
+
       // First get the user's profile to get their person
       final profile = await fetchProfile(_userInfo!['uid']);
       if (profile == null) {
+        if (kDebugMode) {
+          print('Profile not found for user: ${_userInfo!['uid']}');
+        }
         return [];
+      }
+
+      if (kDebugMode) {
+        print('User profile found: $profile');
       }
 
       // Get family members using the user's UID directly
@@ -336,6 +351,13 @@ class AuthService {
         },
       );
 
+      if (kDebugMode) {
+        print('Family members API response status: ${response.statusCode}');
+        print(
+          'Family members API response body: ${utf8.decode(response.bodyBytes)}',
+        );
+      }
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(
           utf8.decode(response.bodyBytes),
@@ -344,6 +366,9 @@ class AuthService {
 
         // Add the user's own information first
         if (profile['person'] != null) {
+          if (kDebugMode) {
+            print('Adding user\'s own information to members list');
+          }
           members.add(
             FamilyMember(
               fromPersonId: _userInfo!['uid'],
@@ -366,7 +391,16 @@ class AuthService {
 
         // Convert all family members to a flat list
         data.forEach((relationship, people) {
+          if (kDebugMode) {
+            print('Processing relationship type: $relationship');
+            print('Number of people in this relationship: ${people.length}');
+          }
           for (var person in people) {
+            if (kDebugMode) {
+              print(
+                'Adding family member: ${person['name']} with relationship: $relationship',
+              );
+            }
             members.add(
               FamilyMember(
                 fromPersonId: _userInfo!['uid'],
@@ -388,6 +422,9 @@ class AuthService {
           }
         });
 
+        if (kDebugMode) {
+          print('Total family members loaded: ${members.length}');
+        }
         return members;
       } else {
         if (kDebugMode) {
