@@ -336,9 +336,44 @@ class _AddClanMemberScreenState extends State<AddClanMemberScreen> {
           birthdate: _selectedBirthDate,
           diedate: _selectedDeathDate,
           biography: _biographyController.text,
-          placeId: _selectedPlaceId,
-          uyeId: _selectedUyeId,
-          urgiinOvogId: _selectedUrgiinOvogId,
+          birthplace:
+              _selectedPlaceId != null
+                  ? {
+                    'uid': _selectedPlaceId,
+                    'name':
+                        _places.firstWhere(
+                          (p) => p['uid'] == _selectedPlaceId,
+                        )['name'],
+                    'country':
+                        _places.firstWhere(
+                          (p) => p['uid'] == _selectedPlaceId,
+                        )['country'],
+                  }
+                  : null,
+          generation:
+              _selectedUyeId != null
+                  ? {
+                    'uid': _selectedUyeId,
+                    'uyname':
+                        _uye.firstWhere(
+                          (u) => u['uid'] == _selectedUyeId,
+                        )['uyname'],
+                    'level':
+                        _uye.firstWhere(
+                          (u) => u['uid'] == _selectedUyeId,
+                        )['level'],
+                  }
+                  : null,
+          urgiinovog:
+              _selectedUrgiinOvogId != null
+                  ? {
+                    'uid': _selectedUrgiinOvogId,
+                    'urgiinovog':
+                        _urgiinOvog.firstWhere(
+                          (u) => u['uid'] == _selectedUrgiinOvogId,
+                        )['urgiinovog'],
+                  }
+                  : null,
         );
 
         final success = await widget.authService.createFamilyMember(member);

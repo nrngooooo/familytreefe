@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../models/family_member.dart';
 import '../api/api_service.dart';
 import 'add_clan_member_screen.dart';
+import 'clan_member_detail_screen.dart';
 
 class ClanMembersScreen extends StatefulWidget {
   final AuthService authService;
@@ -148,45 +149,63 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                       itemCount: filteredMembers.length,
                       itemBuilder: (context, index) {
                         final member = filteredMembers[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 5,
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[400],
-                              borderRadius: BorderRadius.circular(12),
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) =>
+                                        ClanMemberDetailScreen(member: member),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 5,
                             ),
-                            child: Row(
-                              children: [
-                                const CircleAvatar(
-                                  backgroundColor: Colors.black,
-                                  radius: 20,
-                                  child: Icon(
-                                    Icons.person,
-                                    color: Colors.white,
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[400],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        member.gender == 'Эр'
+                                            ? Colors.blue
+                                            : Colors.pink,
+                                    radius: 20,
+                                    child: Icon(
+                                      member.gender == 'Эр'
+                                          ? Icons.male
+                                          : Icons.female,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${member.lastname ?? ''} ${member.name}',
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                                  const SizedBox(width: 10),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${member.lastname ?? ''} ${member.name}',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      'Төрсөн: ${DateFormat('yyyy-MM-dd').format(member.birthdate)}',
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                      Text(
+                                        'Төрсөн: ${DateFormat('yyyy-MM-dd').format(member.birthdate)}',
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         );

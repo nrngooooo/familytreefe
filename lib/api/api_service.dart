@@ -382,9 +382,30 @@ class AuthService {
                       ? DateTime.parse(profile['person']['diedate'])
                       : null,
               biography: profile['person']['biography'],
-              uyeId: profile['person']['generation']?['uid'],
-              placeId: profile['person']['birthplace']?['uid'],
-              urgiinOvogId: profile['person']['urgiinovog']?['uid'],
+              birthplace:
+                  profile['person']['birthplace'] != null
+                      ? {
+                        'uid': profile['person']['birthplace']['uid'],
+                        'name': profile['person']['birthplace']['name'],
+                        'country': profile['person']['birthplace']['country'],
+                      }
+                      : null,
+              generation:
+                  profile['person']['generation'] != null
+                      ? {
+                        'uid': profile['person']['generation']['uid'],
+                        'uyname': profile['person']['generation']['uyname'],
+                        'level': profile['person']['generation']['level'],
+                      }
+                      : null,
+              urgiinovog:
+                  profile['person']['urgiinovog'] != null
+                      ? {
+                        'uid': profile['person']['urgiinovog']['uid'],
+                        'urgiinovog':
+                            profile['person']['urgiinovog']['urgiinovog'],
+                      }
+                      : null,
             ),
           );
         }
@@ -414,9 +435,29 @@ class AuthService {
                         ? DateTime.parse(person['diedate'])
                         : null,
                 biography: person['biography'],
-                uyeId: person['generation']?['uid'],
-                placeId: person['birthplace']?['uid'],
-                urgiinOvogId: person['urgiinovog']?['uid'],
+                birthplace:
+                    person['birthplace'] != null
+                        ? {
+                          'uid': person['birthplace']['uid'],
+                          'name': person['birthplace']['name'],
+                          'country': person['birthplace']['country'],
+                        }
+                        : null,
+                generation:
+                    person['generation'] != null
+                        ? {
+                          'uid': person['generation']['uid'],
+                          'uyname': person['generation']['uyname'],
+                          'level': person['generation']['level'],
+                        }
+                        : null,
+                urgiinovog:
+                    person['urgiinovog'] != null
+                        ? {
+                          'uid': person['urgiinovog']['uid'],
+                          'urgiinovog': person['urgiinovog']['urgiinovog'],
+                        }
+                        : null,
               ),
             );
           }
@@ -461,7 +502,7 @@ class AuthService {
 
       if (kDebugMode) {
         print('Response status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
+        print('Response body: ${utf8.decode(response.bodyBytes)}');
       }
 
       if (response.statusCode == 201 || response.statusCode == 200) {

@@ -25,11 +25,11 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
     _loadFamilyMembers();
     builder
       ..siblingSeparation =
-          200 // Increase the space between siblings
+          150 // Space between siblings
       ..levelSeparation =
-          300 // Increase the vertical space between levels
+          200 // Vertical space between levels
       ..subtreeSeparation =
-          200 // Increase space between different subtrees
+          150 // Space between different subtrees
       ..orientation = BuchheimWalkerConfiguration.ORIENTATION_TOP_BOTTOM;
   }
 
@@ -55,6 +55,20 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
     }
   }
 
+  String? findRootId() {
+    // Find the current user's ID
+    final currentUserId = widget.authService.userInfo?['uid'];
+    if (currentUserId == null) return null;
+
+    // Find the current user's node
+    final currentUser = members.firstWhere(
+      (m) => m.fromPersonId == currentUserId && m.relationshipType == 'ӨӨРӨӨ',
+      orElse: () => members.first,
+    );
+
+    return currentUser.fromPersonId;
+  }
+
   void _buildTree() {
     // Clear existing nodes and edges
     graph.nodes.clear();
@@ -69,7 +83,6 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
 
     if (kDebugMode) {
       print('Building tree with ${members.length} members');
-      print('Current user ID: ${widget.authService.userInfo?['uid']}');
     }
 
     // Create nodes for each family member
@@ -85,23 +98,41 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
       }
     }
 
-    // Find the current user's node
-    final currentUser = members.firstWhere(
-      (m) => m.fromPersonId == widget.authService.userInfo?['uid'],
+    // Find the root node (current user)
+    final rootId = findRootId();
+    if (rootId == null) {
+      if (kDebugMode) {
+        print('Could not find root node');
+      }
+      return;
+    }
+
+    final rootNode =
+        nodeMap['${rootId}_${members.firstWhere((m) => m.fromPersonId == rootId).name}'];
+    if (rootNode == null) {
+      if (kDebugMode) {
+        print('Root node not found in nodeMap');
+      }
+      return;
+    }
+
+    // First, find the father node
+    final father = members.firstWhere(
+      (m) => m.relationshipType == 'ЭЦЭГ' || m.relationshipType == 'father',
       orElse: () => members.first,
     );
-    final currentUserId = '${currentUser.fromPersonId}_${currentUser.name}';
-    final currentUserNode = nodeMap[currentUserId];
+    final fatherNode = nodeMap['${father.fromPersonId}_${father.name}'];
 
     // Add edges based on relationships
     for (var member in members) {
+      if (member.relationshipType == 'ӨӨРӨӨ') continue; // Skip self-reference
+
       final fromNodeId = '${member.fromPersonId}_${member.name}';
       final fromNode = nodeMap[fromNodeId];
+
       if (fromNode == null) {
         if (kDebugMode) {
-          print(
-            'Node not found for member: ${member.name} with ID: $fromNodeId',
-          );
+          print('Node not found for member: ${member.name}');
         }
         continue;
       }
@@ -114,64 +145,37 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
 
       // Add edges based on relationship type
       final relationshipType = member.relationshipType.toLowerCase();
-      if (relationshipType == 'ЭЦЭГ' ||
-          relationshipType == 'father' ||
-          relationshipType == 'ЭХ' ||
-          relationshipType == 'mother') {
-        // Parent to child relationship
-        if (currentUserNode != null) {
-          graph.addEdge(fromNode, currentUserNode);
-          if (kDebugMode) {
-            print(
-              'Added parent-child edge from ${member.name} to current user',
-            );
-          }
-        }
-      } else if (relationshipType == 'ХҮҮХЭД' ||
+      if (relationshipType == 'эцэг' || relationshipType == 'father') {
+        // Father to child relationship (inheritance)
+        graph.addEdge(fromNode, rootNode);
+      } else if (relationshipType == 'эх' || relationshipType == 'mother') {
+        // Mother to child relationship
+        graph.addEdge(fromNode, rootNode);
+      } else if (relationshipType == 'хүүхэд' ||
           relationshipType == 'children') {
         // Child to parent relationship
-        if (currentUserNode != null) {
-          graph.addEdge(currentUserNode, fromNode);
-          if (kDebugMode) {
-            print(
-              'Added child-parent edge from current user to ${member.name}',
-            );
-          }
-        }
-      } else if (relationshipType == 'АХ' ||
+        graph.addEdge(rootNode, fromNode);
+      } else if (relationshipType == 'ах' ||
           relationshipType == 'brothers' ||
-          relationshipType == 'ЭГЧ' ||
+          relationshipType == 'эгч' ||
           relationshipType == 'sisters' ||
-          relationshipType == 'ДҮҮ' ||
+          relationshipType == 'дүү' ||
           relationshipType == 'youngsiblings') {
         // Sibling relationships
-        if (currentUserNode != null) {
-          graph.addEdge(currentUserNode, fromNode);
-          if (kDebugMode) {
-            print('Added sibling edge from current user to ${member.name}');
-          }
+        if (fatherNode != null) {
+          graph.addEdge(fatherNode, fromNode);
         }
       } else if (relationshipType == 'гэр бүл' ||
           relationshipType == 'spouse') {
         // Spouse relationship
-        if (currentUserNode != null) {
-          graph.addEdge(currentUserNode, fromNode);
-          if (kDebugMode) {
-            print('Added spouse edge from current user to ${member.name}');
-          }
-        }
+        graph.addEdge(rootNode, fromNode);
       } else if (relationshipType == 'өвөө' ||
           relationshipType == 'grandfather' ||
           relationshipType == 'эмээ' ||
           relationshipType == 'grandmother') {
         // Grandparent relationships
-        if (currentUserNode != null) {
-          graph.addEdge(fromNode, currentUserNode);
-          if (kDebugMode) {
-            print(
-              'Added grandparent-grandchild edge from ${member.name} to current user',
-            );
-          }
+        if (fatherNode != null) {
+          graph.addEdge(fromNode, fatherNode);
         }
       }
     }
@@ -204,9 +208,7 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
               ? const Center(child: CircularProgressIndicator())
               : InteractiveViewer(
                 constrained: false,
-                boundaryMargin: const EdgeInsets.all(
-                  150,
-                ), // Increase the boundary margin
+                boundaryMargin: const EdgeInsets.all(150),
                 minScale: 0.1,
                 maxScale: 5.0,
                 child: GraphView(
@@ -278,7 +280,7 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
-            radius: 25, // Increased radius for more space
+            radius: 25,
             backgroundColor: Colors.green,
             child: Icon(
               member.gender == 'Эр' ? Icons.male : Icons.female,
