@@ -372,6 +372,7 @@ class AuthService {
           members.add(
             FamilyMember(
               fromPersonId: _userInfo!['uid'],
+              uid: profile['person']['uid'] ?? '',
               relationshipType: 'ӨӨРӨӨ',
               name: profile['person']['name'],
               lastname: profile['person']['lastname'],
@@ -425,6 +426,7 @@ class AuthService {
             members.add(
               FamilyMember(
                 fromPersonId: _userInfo!['uid'],
+                uid: person['uid'] ?? '',
                 relationshipType: relationship,
                 name: person['name'],
                 lastname: person['lastname'],
@@ -680,6 +682,63 @@ class AuthService {
         print("Error fetching relationship types: $e");
       }
       return [];
+    }
+  }
+
+  Future<bool> addRelationship({
+    required String fromPersonId,
+    required String toPersonId,
+    required String relationshipType,
+  }) async {
+    if (_token == null || _token!.isEmpty) {
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
+      return false;
+    }
+
+    if (kDebugMode) {
+      print('Adding relationship with:');
+      print('fromPersonId: $fromPersonId');
+      print('toPersonId: $toPersonId');
+      print('relationshipType: $relationshipType');
+    }
+
+    final url = Uri.parse("$baseUrl/relationship/");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+        body: jsonEncode({
+          "from_person_id": fromPersonId,
+          "to_person_id": toPersonId,
+          "relationship_type": relationshipType,
+        }),
+      );
+
+      if (kDebugMode) {
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${utf8.decode(response.bodyBytes)}');
+      }
+
+      if (response.statusCode == 201) {
+        return true;
+      } else {
+        if (kDebugMode) {
+          print("Failed to add relationship: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Add relationship error: $e");
+      }
+      return false;
     }
   }
 }

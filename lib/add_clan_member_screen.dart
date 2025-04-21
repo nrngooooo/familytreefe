@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 import '../models/family_member.dart';
 import '../api/api_service.dart';
 
@@ -329,6 +330,7 @@ class _AddClanMemberScreenState extends State<AddClanMemberScreen> {
       try {
         final member = FamilyMember(
           fromPersonId: widget.fromPersonId,
+          uid: const Uuid().v4(),
           relationshipType: _selectedRelationshipType,
           name: _nameController.text,
           lastname: _lastnameController.text,

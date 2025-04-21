@@ -4,6 +4,7 @@ import '../models/family_member.dart';
 import '../api/api_service.dart';
 import 'add_clan_member_screen.dart';
 import 'clan_member_detail_screen.dart';
+import 'add_relationship_screen.dart';
 
 class ClanMembersScreen extends StatefulWidget {
   final AuthService authService;
@@ -88,6 +89,22 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
     );
   }
 
+  void _showAddRelationshipScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => AddRelationshipScreen(
+              authService: widget.authService,
+              members: members,
+              onRelationshipAdded: () {
+                _loadFamilyMembers();
+              },
+            ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,6 +120,13 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.link, color: Colors.black),
+            onPressed: _showAddRelationshipScreen,
+            tooltip: 'Харилцаа нэмэх',
+          ),
+        ],
       ),
       body:
           isLoading

@@ -41,6 +41,7 @@ dependencies:
   intl: ^0.19.0
   graphview: ^1.2.0
   motion_tab_bar: ^2.0.4
+  uuid: ^4.3.3
 
 dev_dependencies:
   flutter_test:

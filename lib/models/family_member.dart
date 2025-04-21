@@ -1,5 +1,6 @@
 class FamilyMember {
   final String fromPersonId;
+  final String uid;
   final String relationshipType;
   final String name;
   final String? lastname;
@@ -13,6 +14,7 @@ class FamilyMember {
 
   FamilyMember({
     required this.fromPersonId,
+    required this.uid,
     required this.relationshipType,
     required this.name,
     this.lastname,
@@ -28,6 +30,7 @@ class FamilyMember {
   Map<String, dynamic> toJson() {
     return {
       'fromPersonId': fromPersonId,
+      'uid': uid,
       'relationshipType': relationshipType,
       'name': name,
       'lastname': lastname,
@@ -44,6 +47,7 @@ class FamilyMember {
   factory FamilyMember.fromJson(Map<String, dynamic> json) {
     return FamilyMember(
       fromPersonId: json['fromPersonId'] ?? '',
+      uid: json['uid'] ?? '',
       relationshipType: json['relationshipType'] ?? '',
       name: json['name'] ?? '',
       lastname: json['lastname'],
