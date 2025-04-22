@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/family_member.dart';
 import '../api/api_service.dart';
+import 'package:flutter/foundation.dart';
 
 class AddRelationshipScreen extends StatefulWidget {
   final AuthService authService;
@@ -54,11 +55,28 @@ class _AddRelationshipScreenState extends State<AddRelationshipScreen> {
       return;
     }
 
+    // Validate that both members have valid UIDs
+    if (_selectedFromMember!.uid.isEmpty || _selectedToMember!.uid.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid member selection. Please try again.'),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
+      if (kDebugMode) {
+        print('Adding relationship with:');
+        print('fromPersonId: ${_selectedFromMember!.uid}');
+        print('toPersonId: ${_selectedToMember!.uid}');
+        print('relationshipType: $_selectedRelationshipType');
+      }
+
       final success = await widget.authService.addRelationship(
         fromPersonId: _selectedFromMember!.uid,
         toPersonId: _selectedToMember!.uid,
@@ -141,6 +159,11 @@ class _AddRelationshipScreenState extends State<AddRelationshipScreen> {
                                   ),
                                   subtitle: Text(member.relationshipType),
                                   onTap: () {
+                                    if (kDebugMode) {
+                                      print(
+                                        'Selected from member: ${member.name} with uid: ${member.uid}',
+                                      );
+                                    }
                                     setState(() {
                                       _selectedFromMember = member;
                                     });
@@ -181,6 +204,11 @@ class _AddRelationshipScreenState extends State<AddRelationshipScreen> {
                                   ),
                                   subtitle: Text(member.relationshipType),
                                   onTap: () {
+                                    if (kDebugMode) {
+                                      print(
+                                        'Selected to member: ${member.name} with uid: ${member.uid}',
+                                      );
+                                    }
                                     setState(() {
                                       _selectedToMember = member;
                                     });

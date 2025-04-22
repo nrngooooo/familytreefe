@@ -493,13 +493,35 @@ class AuthService {
     }
 
     try {
+      // Format the data according to the API requirements
+      final requestData = {
+        'from_person_id': member.fromPersonId,
+        'relationship_type': member.relationshipType,
+        'name': member.name,
+        'lastname': member.lastname,
+        'gender': member.gender,
+        'birthdate':
+            member.birthdate.toIso8601String().split(
+              'T',
+            )[0], // Format as YYYY-MM-DD
+        'diedate': member.diedate?.toIso8601String().split('T')[0],
+        'biography': member.biography,
+        'birthplace': member.birthplace,
+        'generation': member.generation,
+        'urgiinovog': member.urgiinovog,
+      };
+
+      if (kDebugMode) {
+        print('Sending request data: $requestData');
+      }
+
       final response = await http.post(
         Uri.parse("$baseUrl/family/add/"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Token $_token",
         },
-        body: json.encode(member.toJson()),
+        body: json.encode(requestData),
       );
 
       if (kDebugMode) {
@@ -707,17 +729,24 @@ class AuthService {
     final url = Uri.parse("$baseUrl/relationship/");
 
     try {
+      // Create the request data with the exact field names expected by the backend
+      final requestData = {
+        'from_person_id': fromPersonId,
+        'to_person_id': toPersonId,
+        'relationship_type': relationshipType,
+      };
+
+      if (kDebugMode) {
+        print('Sending request data: $requestData');
+      }
+
       final response = await http.post(
         url,
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Token $_token",
         },
-        body: jsonEncode({
-          "from_person_id": fromPersonId,
-          "to_person_id": toPersonId,
-          "relationship_type": relationshipType,
-        }),
+        body: jsonEncode(requestData),
       );
 
       if (kDebugMode) {
