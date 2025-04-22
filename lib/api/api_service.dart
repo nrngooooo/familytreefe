@@ -770,4 +770,43 @@ class AuthService {
       return false;
     }
   }
+
+  Future<bool> createSimplePerson(Map<String, dynamic> personData) async {
+    if (_token == null || _token!.isEmpty) {
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
+      return false;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/simple-person/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+        body: json.encode(personData),
+      );
+
+      if (kDebugMode) {
+        print('Response status code: ${response.statusCode}');
+        print('Response body: ${utf8.decode(response.bodyBytes)}');
+      }
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return true;
+      } else {
+        if (kDebugMode) {
+          print('Error response: ${response.body}');
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error creating simple person: $e');
+      }
+      return false;
+    }
+  }
 }

@@ -3,6 +3,7 @@ import 'package:graphview/GraphView.dart';
 import '../models/family_member.dart';
 import '../api/api_service.dart';
 import 'package:flutter/foundation.dart';
+import 'add_person_form.dart';
 
 class FamilyTreeScreen extends StatefulWidget {
   final AuthService authService;
@@ -202,6 +203,19 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
           ),
         ),
         centerTitle: true,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => AddPersonForm(authService: widget.authService),
+            ),
+          );
+        },
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.person_add),
       ),
       body:
           isLoading
