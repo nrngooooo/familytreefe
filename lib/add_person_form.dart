@@ -23,8 +23,10 @@ class _AddPersonFormState extends State<AddPersonForm> {
   DateTime? _selectedDeathDate;
   Map<String, dynamic>? _selectedBirthplace;
   Map<String, dynamic>? _selectedUrgiinOvog;
+  Map<String, dynamic>? _selectedUye;
   List<Map<String, dynamic>> _places = [];
   List<Map<String, dynamic>> _urgiinOvogList = [];
+  List<Map<String, dynamic>> _uyeList = [];
   bool _isLoading = false;
 
   @override
@@ -32,6 +34,7 @@ class _AddPersonFormState extends State<AddPersonForm> {
     super.initState();
     _loadPlaces();
     _loadUrgiinOvog();
+    _loadUye();
   }
 
   @override
@@ -69,6 +72,22 @@ class _AddPersonFormState extends State<AddPersonForm> {
           SnackBar(
             content: Text('Ургийн овгийн мэдээлэл ачаалахад алдаа гарлаа: $e'),
           ),
+        );
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadUye() async {
+    setState(() => _isLoading = true);
+    try {
+      final uye = await widget.authService.getUye();
+      setState(() => _uyeList = uye);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Үеийн мэдээлэл ачаалахад алдаа гарлаа: $e')),
         );
       }
     } finally {
@@ -123,6 +142,7 @@ class _AddPersonFormState extends State<AddPersonForm> {
           'biography': _biographyController.text,
           'birthplace': _selectedBirthplace,
           'urgiinovog_id': _selectedUrgiinOvog?['uid'],
+          'uye_id': _selectedUye?['uid'],
         };
 
         final success = await widget.authService.createSimplePerson(person);
@@ -272,6 +292,28 @@ class _AddPersonFormState extends State<AddPersonForm> {
                         onChanged: (value) {
                           setState(() {
                             _selectedUrgiinOvog = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<Map<String, dynamic>>(
+                        value: _selectedUye,
+                        decoration: const InputDecoration(
+                          labelText: 'Үе',
+                          border: OutlineInputBorder(),
+                        ),
+                        items:
+                            _uyeList.map((uye) {
+                              return DropdownMenuItem(
+                                value: uye,
+                                child: Text(
+                                  '${uye['uyname']} (${uye['level']})',
+                                ),
+                              );
+                            }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedUye = value;
                           });
                         },
                       ),

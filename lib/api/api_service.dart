@@ -670,6 +670,91 @@ class AuthService {
     }
   }
 
+  Future<List<FamilyMember>> getClanMembers(String clanId) async {
+    if (_token == null || _token!.isEmpty) {
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
+      return [];
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/urgiinovog/$clanId/members/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        final members =
+            data.map((person) {
+              Map<String, dynamic>? birthplace;
+              if (person['birthplace'] != null) {
+                birthplace = {
+                  'uid': person['birthplace']['uid'],
+                  'name': person['birthplace']['name'],
+                  'country': person['birthplace']['country'],
+                };
+              }
+
+              Map<String, dynamic>? generation;
+              if (person['generation'] != null) {
+                generation = {
+                  'uid': person['generation']['uid'],
+                  'uyname': person['generation']['uyname'],
+                  'level': person['generation']['level'],
+                };
+              }
+
+              Map<String, dynamic>? urgiinovog;
+              if (person['urgiinovog'] != null) {
+                urgiinovog = {
+                  'uid': person['urgiinovog']['uid'],
+                  'urgiinovog': person['urgiinovog']['urgiinovog'],
+                };
+              }
+
+              return FamilyMember(
+                fromPersonId: person['uid'],
+                uid: person['uid'],
+                relationshipType: 'НЭГДСЭНГҮЙ',
+                name: person['name'],
+                lastname: person['lastname'],
+                gender: person['gender'],
+                birthdate: DateTime.parse(person['birthdate']),
+                diedate:
+                    person['diedate'] != null
+                        ? DateTime.parse(person['diedate'])
+                        : null,
+                biography: person['biography'],
+                birthplace: birthplace,
+                generation: generation,
+                urgiinovog: urgiinovog,
+              );
+            }).toList();
+
+        if (kDebugMode) {
+          print('Total clan members loaded: ${members.length}');
+        }
+        return members;
+      } else {
+        if (kDebugMode) {
+          print("Failed to load clan members: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
+        }
+        return [];
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error fetching clan members: $e");
+      }
+      return [];
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getRelationshipTypes() async {
     if (_token == null || _token!.isEmpty) {
       if (kDebugMode) {
@@ -807,6 +892,191 @@ class AuthService {
         print('Error creating simple person: $e');
       }
       return false;
+    }
+  }
+
+  Future<List<FamilyMember>> getAllPeople() async {
+    if (_token == null || _token!.isEmpty) {
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
+      return [];
+    }
+
+    try {
+      // First get all people
+      final response = await http.get(
+        Uri.parse("$baseUrl/simple-person/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+
+        // Then get family members to check relationships
+        final familyMembers = await getFamilyMembers();
+
+        // Create a map of UIDs to relationship types
+        final Map<String, String> relationshipMap = {};
+        for (var member in familyMembers) {
+          relationshipMap[member.uid] = member.relationshipType;
+        }
+
+        return data.map((person) {
+          final String relationshipType =
+              relationshipMap[person['uid']] ?? 'НЭГДСЭНГҮЙ';
+          return FamilyMember(
+            fromPersonId: _userInfo!['uid'],
+            uid: person['uid'],
+            relationshipType: relationshipType,
+            name: person['name'],
+            lastname: person['lastname'],
+            gender: person['gender'],
+            birthdate: DateTime.parse(person['birthdate']),
+            diedate:
+                person['diedate'] != null
+                    ? DateTime.parse(person['diedate'])
+                    : null,
+            biography: person['biography'],
+            birthplace: person['birthplace'],
+            generation: person['generation'],
+            urgiinovog: person['urgiinovog'],
+          );
+        }).toList();
+      } else {
+        if (kDebugMode) {
+          print("Failed to load all people: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
+        }
+        return [];
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error fetching all people: $e");
+      }
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserClan() async {
+    if (_token == null || _token!.isEmpty) {
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
+      return null;
+    }
+
+    if (_userInfo == null || _userInfo!['uid'] == null) {
+      if (kDebugMode) {
+        print('Error: No user info available');
+      }
+      return null;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/user/${_userInfo!['uid']}/clan/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+      );
+
+      if (kDebugMode) {
+        print('User clan API response status: ${response.statusCode}');
+        print(
+          'User clan API response body: ${utf8.decode(response.bodyBytes)}',
+        );
+      }
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(
+          utf8.decode(response.bodyBytes),
+        );
+        return data;
+      } else {
+        if (kDebugMode) {
+          print("Failed to load user clan: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
+        }
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error fetching user clan: $e");
+      }
+      return null;
+    }
+  }
+
+  Future<List<FamilyMember>> getPeopleByLastName(String lastname) async {
+    if (_token == null) {
+      return [];
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/people/lastname/$lastname/"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      if (kDebugMode) {
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data
+            .map(
+              (json) => FamilyMember(
+                uid: json['uid'],
+                name: json['name'],
+                lastname: json['lastname'],
+                gender: json['gender'],
+                birthdate: json['birthdate'],
+                diedate: json['diedate'],
+                biography: json['biography'],
+                birthplace:
+                    json['birthplace'] != null
+                        ? {
+                          'uid': json['birthplace']['uid'],
+                          'name': json['birthplace']['name'],
+                          'country': json['birthplace']['country'],
+                        }
+                        : null,
+                generation:
+                    json['generation'] != null
+                        ? {
+                          'uid': json['generation']['uid'],
+                          'uyname': json['generation']['uyname'],
+                          'level': json['generation']['level'],
+                        }
+                        : null,
+                relationshipType:
+                    'НЭГДСЭНГҮЙ', // Default relationship type for clan members
+                fromPersonId:
+                    '', // Empty string since this is not a direct relationship
+              ),
+            )
+            .toList();
+      } else {
+        if (kDebugMode) {
+          print('Failed to get people by last name: ${response.body}');
+        }
+        return [];
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting people by last name: $e');
+      }
+      return [];
     }
   }
 }
