@@ -465,6 +465,42 @@ class AuthService {
           }
         });
 
+        // Process children to determine their actual parent
+        final siblings =
+            members
+                .where(
+                  (m) =>
+                      m.relationshipType == 'АХ' ||
+                      m.relationshipType == 'ЭГЧ' ||
+                      m.relationshipType == 'ДҮҮ',
+                )
+                .toList();
+
+        // First, collect all children
+        final allChildren =
+            members.where((m) => m.relationshipType == 'ХҮҮХЭД').toList();
+
+        // Then, for each child, determine if they belong to a sibling
+        for (var child in allChildren) {
+          // Find the sibling that this child belongs to
+          final parentSibling = siblings.firstWhere(
+            (sibling) => child.fromPersonId == sibling.uid,
+            orElse: () => members.first,
+          );
+
+          // If the child belongs to a sibling, update their relationship
+          if (parentSibling.relationshipType != 'ӨӨРӨӨ') {
+            child.relationshipType =
+                '${parentSibling.relationshipType}ИЙН ХҮҮХЭД';
+            child.fromPersonId = parentSibling.uid;
+            if (kDebugMode) {
+              print(
+                'Updated child ${child.name} to be child of ${parentSibling.name}',
+              );
+            }
+          }
+        }
+
         if (kDebugMode) {
           print('Total family members loaded: ${members.length}');
         }
@@ -1169,6 +1205,47 @@ class AuthService {
         print('Error getting people by last name: $e');
       }
       return [];
+    }
+  }
+
+  Future<bool> deleteFamilyMember(String uid) async {
+    if (_token == null || _token!.isEmpty) {
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
+      return false;
+    }
+
+    try {
+      final response = await http.delete(
+        Uri.parse("$baseUrl/family/$uid/delete/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+      );
+
+      if (kDebugMode) {
+        print('Delete family member response status: ${response.statusCode}');
+        print(
+          'Delete family member response body: ${utf8.decode(response.bodyBytes)}',
+        );
+      }
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        if (kDebugMode) {
+          print("Failed to delete family member: ${response.statusCode}");
+          print("Response body: ${utf8.decode(response.bodyBytes)}");
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error deleting family member: $e");
+      }
+      return false;
     }
   }
 }

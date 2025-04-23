@@ -6,6 +6,7 @@ import 'add_clan_member_screen.dart';
 import 'clan_member_detail_screen.dart';
 import 'add_relationship_screen.dart';
 import 'edit_clan_member_screen.dart';
+import 'delete_clan_member_screen.dart';
 
 class ClanMembersScreen extends StatefulWidget {
   final AuthService authService;
@@ -143,6 +144,26 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
             onPressed: _showAddRelationshipScreen,
             tooltip: 'Харилцаа нэмэх',
           ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.black),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => DeleteClanMemberScreen(
+                        authService: widget.authService,
+                        members: members,
+                      ),
+                ),
+              ).then((refresh) {
+                if (refresh == true) {
+                  _loadFamilyMembers();
+                }
+              });
+            },
+            tooltip: 'Гишүүн устгах',
+          ),
         ],
       ),
       body:
@@ -208,76 +229,197 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                       itemCount: filteredMembers.length,
                       itemBuilder: (context, index) {
                         final member = filteredMembers[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) =>
-                                        ClanMemberDetailScreen(member: member),
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 5,
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[400],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor:
-                                        member.gender == 'Эр'
-                                            ? Colors.blue
-                                            : Colors.pink,
-                                    radius: 20,
-                                    child: Icon(
-                                      member.gender == 'Эр'
-                                          ? Icons.male
-                                          : Icons.female,
-                                      color: Colors.white,
-                                    ),
+                        // Find children of this member
+                        final children =
+                            members
+                                .where(
+                                  (m) =>
+                                      m.relationshipType == 'ХҮҮХЭД' &&
+                                      m.fromPersonId == member.fromPersonId,
+                                )
+                                .toList();
+
+                        return Column(
+                          children: [
+                            // Main member card
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => ClanMemberDetailScreen(
+                                          member: member,
+                                        ),
                                   ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          '${member.lastname ?? ''} ${member.name}',
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 5,
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[400],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundColor:
+                                            member.gender == 'Эр'
+                                                ? Colors.blue
+                                                : Colors.pink,
+                                        radius: 20,
+                                        child: Icon(
+                                          member.gender == 'Эр'
+                                              ? Icons.male
+                                              : Icons.female,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              '${member.lastname ?? ''} ${member.name}',
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              'Төрсөн: ${DateFormat('yyyy-MM-dd').format(member.birthdate)}',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            if (children.isNotEmpty)
+                                              Text(
+                                                '${children.length} хүүхэдтэй',
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.edit,
+                                          color: Colors.black,
+                                        ),
+                                        onPressed:
+                                            () => _showEditMemberScreen(member),
+                                        tooltip: 'Засах',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Children list if any
+                            if (children.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 32.0),
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: children.length,
+                                  itemBuilder: (context, childIndex) {
+                                    final child = children[childIndex];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (context) =>
+                                                    ClanMemberDetailScreen(
+                                                      member: child,
+                                                    ),
+                                          ),
+                                        );
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 5,
+                                        ),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[300],
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              CircleAvatar(
+                                                backgroundColor:
+                                                    child.gender == 'Эр'
+                                                        ? Colors.blue
+                                                        : Colors.pink,
+                                                radius: 15,
+                                                child: Icon(
+                                                  child.gender == 'Эр'
+                                                      ? Icons.male
+                                                      : Icons.female,
+                                                  color: Colors.white,
+                                                  size: 16,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      '${child.lastname ?? ''} ${child.name}',
+                                                      style: const TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      'Төрсөн: ${DateFormat('yyyy-MM-dd').format(child.birthdate)}',
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.edit,
+                                                  color: Colors.black,
+                                                  size: 20,
+                                                ),
+                                                onPressed:
+                                                    () => _showEditMemberScreen(
+                                                      child,
+                                                    ),
+                                                tooltip: 'Засах',
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        Text(
-                                          'Төрсөн: ${DateFormat('yyyy-MM-dd').format(member.birthdate)}',
-                                          style: const TextStyle(fontSize: 14),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      color: Colors.black,
-                                    ),
-                                    onPressed:
-                                        () => _showEditMemberScreen(member),
-                                    tooltip: 'Засах',
-                                  ),
-                                ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          ),
+                          ],
                         );
                       },
                       separatorBuilder: (context, index) {

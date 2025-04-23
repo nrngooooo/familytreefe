@@ -1,7 +1,7 @@
 class FamilyMember {
-  final String fromPersonId;
+  String fromPersonId;
   final String uid;
-  final String relationshipType;
+  String relationshipType;
   final String name;
   final String? lastname;
   final String gender;
