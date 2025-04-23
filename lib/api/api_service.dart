@@ -506,10 +506,22 @@ class AuthService {
             )[0], // Format as YYYY-MM-DD
         'diedate': member.diedate?.toIso8601String().split('T')[0],
         'biography': member.biography,
-        'birthplace': member.birthplace,
-        'generation': member.generation,
-        'urgiinovog': member.urgiinovog,
       };
+
+      // Add birthplace if available
+      if (member.birthplace != null) {
+        requestData['place_id'] = member.birthplace!['uid'];
+      }
+
+      // Add generation (uye) if available
+      if (member.generation != null) {
+        requestData['uye_id'] = member.generation!['uid'];
+      }
+
+      // Add urgiinovog if available
+      if (member.urgiinovog != null) {
+        requestData['urgiinovog_id'] = member.urgiinovog!['uid'];
+      }
 
       if (kDebugMode) {
         print('Sending request data: $requestData');
@@ -540,6 +552,86 @@ class AuthService {
     } catch (e) {
       if (kDebugMode) {
         print('Error creating family member: $e');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> updateFamilyMember(FamilyMember member) async {
+    if (_token == null || _token!.isEmpty) {
+      if (kDebugMode) {
+        print('Error: No authentication token available');
+      }
+      return false;
+    }
+
+    try {
+      // Format the data according to the API requirements
+      final requestData = {
+        'name': member.name,
+        'lastname': member.lastname,
+        'gender': member.gender,
+        'birthdate':
+            member.birthdate.toIso8601String().split(
+              'T',
+            )[0], // Format as YYYY-MM-DD
+        'diedate': member.diedate?.toIso8601String().split('T')[0],
+        'biography': member.biography,
+      };
+
+      // Add birthplace if available
+      if (member.birthplace != null) {
+        requestData['place_id'] = member.birthplace!['uid'];
+      }
+
+      // Add generation (uye) if available
+      if (member.generation != null) {
+        requestData['uye_id'] = member.generation!['uid'];
+      }
+
+      // Add urgiinovog if available
+      if (member.urgiinovog != null) {
+        requestData['urgiinovog_id'] = member.urgiinovog!['uid'];
+      }
+
+      if (kDebugMode) {
+        print('Sending update request data: $requestData');
+        print('Member UID: ${member.uid}');
+      }
+
+      // Check if member.uid is empty or null
+      if (member.uid.isEmpty) {
+        if (kDebugMode) {
+          print('Error: Member UID is empty');
+        }
+        return false;
+      }
+
+      final response = await http.put(
+        Uri.parse("$baseUrl/family/${member.uid}/update/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Token $_token",
+        },
+        body: json.encode(requestData),
+      );
+
+      if (kDebugMode) {
+        print('Update response status code: ${response.statusCode}');
+        print('Update response body: ${utf8.decode(response.bodyBytes)}');
+      }
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        if (kDebugMode) {
+          print('Error response: ${response.body}');
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating family member: $e');
       }
       return false;
     }

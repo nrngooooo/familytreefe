@@ -5,6 +5,7 @@ import '../api/api_service.dart';
 import 'add_clan_member_screen.dart';
 import 'clan_member_detail_screen.dart';
 import 'add_relationship_screen.dart';
+import 'edit_clan_member_screen.dart';
 
 class ClanMembersScreen extends StatefulWidget {
   final AuthService authService;
@@ -105,6 +106,22 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
     );
   }
 
+  void _showEditMemberScreen(FamilyMember member) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => EditClanMemberScreen(
+              authService: widget.authService,
+              onMemberUpdated: () {
+                _loadFamilyMembers();
+              },
+              member: member,
+            ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,6 +180,24 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.green[800],
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.add, color: Colors.white),
+                            onPressed: _showAddMemberScreen,
+                            tooltip: 'Овгийн гишүүн нэмэх',
+                            iconSize: 20,
+                            padding: const EdgeInsets.all(8),
+                            constraints: const BoxConstraints(
+                              minWidth: 36,
+                              minHeight: 36,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -211,22 +246,33 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${member.lastname ?? ''} ${member.name}',
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${member.lastname ?? ''} ${member.name}',
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        'Төрсөн: ${DateFormat('yyyy-MM-dd').format(member.birthdate)}',
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                    ],
+                                        Text(
+                                          'Төрсөн: ${DateFormat('yyyy-MM-dd').format(member.birthdate)}',
+                                          style: const TextStyle(fontSize: 14),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.black,
+                                    ),
+                                    onPressed:
+                                        () => _showEditMemberScreen(member),
+                                    tooltip: 'Засах',
                                   ),
                                 ],
                               ),
@@ -241,11 +287,6 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                   ),
                 ],
               ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddMemberScreen,
-        backgroundColor: Colors.green[800],
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
     );
   }
 }
