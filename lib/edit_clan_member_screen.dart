@@ -136,169 +136,331 @@ class _EditClanMemberScreenState extends State<EditClanMemberScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Овгийн гишүүн засах'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120.0,
+            floating: false,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.green[800]!, Colors.green[600]!],
+                  ),
+                ),
+                child: Center(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Нэр',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Нэр оруулна уу';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _lastnameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Овог',
-                          border: OutlineInputBorder(),
+                      const SizedBox(height: 30),
+                      Text(
+                        '${widget.member.lastname ?? ''} ${widget.member.name}',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        value: _selectedGender,
-                        decoration: const InputDecoration(
-                          labelText: 'Хүйс',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: const [
-                          DropdownMenuItem(value: 'Эр', child: Text('Эр')),
-                          DropdownMenuItem(value: 'Эм', child: Text('Эм')),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedGender = value!;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      ListTile(
-                        title: const Text('Төрсөн огноо'),
-                        subtitle: Text(
-                          DateFormat('yyyy-MM-dd').format(_selectedBirthDate),
-                        ),
-                        trailing: const Icon(Icons.calendar_today),
-                        onTap: () => _selectDate(context, true),
-                      ),
-                      const SizedBox(height: 16),
-                      ListTile(
-                        title: const Text('Нас барсан огноо'),
-                        subtitle: Text(
-                          _selectedDeathDate != null
-                              ? DateFormat(
-                                'yyyy-MM-dd',
-                              ).format(_selectedDeathDate!)
-                              : 'Тодорхойгүй',
-                        ),
-                        trailing: const Icon(Icons.calendar_today),
-                        onTap: () => _selectDate(context, false),
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        value: _selectedPlaceId,
-                        decoration: const InputDecoration(
-                          labelText: 'Төрсөн газар',
-                          border: OutlineInputBorder(),
-                        ),
-                        items:
-                            _places.map((place) {
-                              return DropdownMenuItem<String>(
-                                value: place['uid']?.toString(),
-                                child: Text(
-                                  '${place['name']} (${place['country']})',
-                                ),
-                              );
-                            }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedPlaceId = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        value: _selectedUyeId,
-                        decoration: const InputDecoration(
-                          labelText: 'Үе',
-                          border: OutlineInputBorder(),
-                        ),
-                        items:
-                            _uye.map((uye) {
-                              return DropdownMenuItem<String>(
-                                value: uye['uid']?.toString(),
-                                child: Text(
-                                  uye['uyname']?.toString() ?? 'Unknown',
-                                ),
-                              );
-                            }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedUyeId = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        value: _selectedUrgiinOvogId,
-                        decoration: const InputDecoration(
-                          labelText: 'Ургийн овог',
-                          border: OutlineInputBorder(),
-                        ),
-                        items:
-                            _urgiinOvog.map((ovog) {
-                              return DropdownMenuItem<String>(
-                                value: ovog['uid']?.toString(),
-                                child: Text(
-                                  ovog['urgiinovog']?.toString() ?? 'Unknown',
-                                ),
-                              );
-                            }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedUrgiinOvogId = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _biographyController,
-                        decoration: const InputDecoration(
-                          labelText: 'Намтар',
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _submitForm,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green[800],
-                          minimumSize: const Size(double.infinity, 50),
-                        ),
-                        child: const Text('Хадгалах'),
+                      const Text(
+                        'Мэдээлэл засах',
+                        style: TextStyle(fontSize: 16, color: Colors.white70),
                       ),
                     ],
                   ),
                 ),
               ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child:
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSection('Хувийн мэдээлэл', Icons.person, [
+                              _buildTextField(
+                                controller: _nameController,
+                                label: 'Нэр',
+                                icon: Icons.person,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Нэр оруулна уу';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _lastnameController,
+                                label: 'Овог',
+                                icon: Icons.person_outline,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildDropdown(
+                                value: _selectedGender,
+                                label: 'Хүйс',
+                                icon: Icons.person,
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'Эр',
+                                    child: Text('Эр'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Эм',
+                                    child: Text('Эм'),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedGender = value!;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildDateField(
+                                label: 'Төрсөн огноо',
+                                value: DateFormat(
+                                  'yyyy-MM-dd',
+                                ).format(_selectedBirthDate),
+                                onTap: () => _selectDate(context, true),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildDateField(
+                                label: 'Нас барсан огноо',
+                                value:
+                                    _selectedDeathDate != null
+                                        ? DateFormat(
+                                          'yyyy-MM-dd',
+                                        ).format(_selectedDeathDate!)
+                                        : 'Тодорхойгүй',
+                                onTap: () => _selectDate(context, false),
+                              ),
+                            ]),
+                            const SizedBox(height: 24),
+                            _buildSection('Нэмэлт мэдээлэл', Icons.info, [
+                              _buildDropdown(
+                                value: _selectedPlaceId,
+                                label: 'Төрсөн газар',
+                                icon: Icons.location_on,
+                                items:
+                                    _places.map((place) {
+                                      return DropdownMenuItem<String>(
+                                        value: place['uid']?.toString(),
+                                        child: Text(
+                                          '${place['name']} (${place['country']})',
+                                        ),
+                                      );
+                                    }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedPlaceId = value;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildDropdown(
+                                value: _selectedUyeId,
+                                label: 'Үе',
+                                icon: Icons.generating_tokens,
+                                items:
+                                    _uye.map((uye) {
+                                      return DropdownMenuItem<String>(
+                                        value: uye['uid']?.toString(),
+                                        child: Text(
+                                          uye['uyname']?.toString() ??
+                                              'Unknown',
+                                        ),
+                                      );
+                                    }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedUyeId = value;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildDropdown(
+                                value: _selectedUrgiinOvogId,
+                                label: 'Ургийн овог',
+                                icon: Icons.family_restroom,
+                                items:
+                                    _urgiinOvog.map((ovog) {
+                                      return DropdownMenuItem<String>(
+                                        value: ovog['uid']?.toString(),
+                                        child: Text(
+                                          ovog['urgiinovog']?.toString() ??
+                                              'Unknown',
+                                        ),
+                                      );
+                                    }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedUrgiinOvogId = value;
+                                  });
+                                },
+                              ),
+                            ]),
+                            const SizedBox(height: 24),
+                            _buildSection('Намтар', Icons.book, [
+                              _buildTextField(
+                                controller: _biographyController,
+                                label: 'Намтар',
+                                icon: Icons.book,
+                                maxLines: 5,
+                              ),
+                            ]),
+                            const SizedBox(height: 32),
+                            ElevatedButton(
+                              onPressed: _submitForm,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green[800],
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Хадгалах',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, IconData icon, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Colors.green[800], size: 24),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.green[800],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ...children,
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.green[800]),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.green[800]!),
+        ),
+        filled: true,
+        fillColor: Colors.grey[100],
+      ),
+      validator: validator,
+    );
+  }
+
+  Widget _buildDropdown({
+    required String? value,
+    required String label,
+    required IconData icon,
+    required List<DropdownMenuItem<String>> items,
+    required void Function(String?) onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.green[800]),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.green[800]!),
+        ),
+        filled: true,
+        fillColor: Colors.grey[100],
+      ),
+      items: items,
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildDateField({
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(Icons.calendar_today, color: Colors.green[800]),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[400]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[400]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.green[800]!),
+          ),
+          filled: true,
+          fillColor: Colors.grey[100],
+        ),
+        child: Text(value),
+      ),
     );
   }
 

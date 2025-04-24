@@ -250,6 +250,8 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                                     builder:
                                         (context) => ClanMemberDetailScreen(
                                           member: member,
+                                          authService: widget.authService,
+                                          onMemberUpdated: _loadFamilyMembers,
                                         ),
                                   ),
                                 );
@@ -343,6 +345,10 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                                                 (context) =>
                                                     ClanMemberDetailScreen(
                                                       member: child,
+                                                      authService:
+                                                          widget.authService,
+                                                      onMemberUpdated:
+                                                          _loadFamilyMembers,
                                                     ),
                                           ),
                                         );
