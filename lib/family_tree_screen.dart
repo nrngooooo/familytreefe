@@ -16,7 +16,7 @@ class FamilyTreeScreen extends StatefulWidget {
 
 class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
   final Graph graph = Graph();
-  BuchheimWalkerConfiguration builder = BuchheimWalkerConfiguration();
+  SugiyamaConfiguration builder = SugiyamaConfiguration();
   bool isLoading = true;
   List<FamilyMember> members = [];
 
@@ -24,14 +24,12 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
   void initState() {
     super.initState();
     _loadFamilyMembers();
+
+    // Configure the Sugiyama layout for better tree visualization
     builder
-      ..siblingSeparation =
-          150 // Space between siblings
-      ..levelSeparation =
-          200 // Vertical space between levels
-      ..subtreeSeparation =
-          150 // Space between different subtrees
-      ..orientation = BuchheimWalkerConfiguration.ORIENTATION_TOP_BOTTOM;
+      ..nodeSeparation = 100
+      ..levelSeparation = 150
+      ..orientation = SugiyamaConfiguration.ORIENTATION_TOP_BOTTOM;
   }
 
   Future<void> _loadFamilyMembers() async {
@@ -108,8 +106,10 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
       return;
     }
 
-    final rootNode =
-        nodeMap['${rootId}_${members.firstWhere((m) => m.fromPersonId == rootId).name}'];
+    final rootMember = members.firstWhere((m) => m.fromPersonId == rootId);
+    final rootNodeId = '${rootId}_${rootMember.name}';
+    final rootNode = nodeMap[rootNodeId];
+
     if (rootNode == null) {
       if (kDebugMode) {
         print('Root node not found in nodeMap');
@@ -117,68 +117,150 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
       return;
     }
 
-    // First, find the father node
-    final father = members.firstWhere(
-      (m) => m.relationshipType == 'ЭЦЭГ' || m.relationshipType == 'father',
+    // Group members by relationship type
+    Map<String, List<FamilyMember>> relationshipGroups = {};
+    for (var member in members) {
+      final relType = member.relationshipType.toLowerCase();
+      if (!relationshipGroups.containsKey(relType)) {
+        relationshipGroups[relType] = [];
+      }
+      relationshipGroups[relType]!.add(member);
+    }
+
+    // Find key family members
+    FamilyMember? self = members.firstWhere(
+      (m) => m.relationshipType.toLowerCase() == 'өөрөө',
       orElse: () => members.first,
     );
-    final fatherNode = nodeMap['${father.fromPersonId}_${father.name}'];
 
-    // Add edges based on relationships
-    for (var member in members) {
-      if (member.relationshipType == 'ӨӨРӨӨ') continue; // Skip self-reference
+    List<FamilyMember> fathers =
+        relationshipGroups['эцэг'] ?? relationshipGroups['father'] ?? [];
+    List<FamilyMember> mothers =
+        relationshipGroups['эх'] ?? relationshipGroups['mother'] ?? [];
+    List<FamilyMember> grandfathers =
+        relationshipGroups['өвөө'] ?? relationshipGroups['grandfather'] ?? [];
+    List<FamilyMember> grandmothers =
+        relationshipGroups['эмээ'] ?? relationshipGroups['grandmother'] ?? [];
+    List<FamilyMember> siblings = [
+      ...(relationshipGroups['ах'] ?? []),
+      ...(relationshipGroups['brothers'] ?? []),
+      ...(relationshipGroups['эгч'] ?? []),
+      ...(relationshipGroups['sisters'] ?? []),
+      ...(relationshipGroups['дүү'] ?? []),
+      ...(relationshipGroups['youngsiblings'] ?? []),
+    ];
+    List<FamilyMember> children =
+        relationshipGroups['хүүхэд'] ?? relationshipGroups['children'] ?? [];
+    List<FamilyMember> spouses =
+        relationshipGroups['гэр бүл'] ?? relationshipGroups['spouse'] ?? [];
 
-      final fromNodeId = '${member.fromPersonId}_${member.name}';
-      final fromNode = nodeMap[fromNodeId];
+    // Get nodes for family members
+    Node? fatherNode =
+        fathers.isNotEmpty
+            ? nodeMap['${fathers.first.fromPersonId}_${fathers.first.name}']
+            : null;
+    Node? motherNode =
+        mothers.isNotEmpty
+            ? nodeMap['${mothers.first.fromPersonId}_${mothers.first.name}']
+            : null;
+    Node? grandfatherNode =
+        grandfathers.isNotEmpty
+            ? nodeMap['${grandfathers.first.fromPersonId}_${grandfathers.first.name}']
+            : null;
+    Node? grandmotherNode =
+        grandmothers.isNotEmpty
+            ? nodeMap['${grandmothers.first.fromPersonId}_${grandmothers.first.name}']
+            : null;
 
-      if (fromNode == null) {
-        if (kDebugMode) {
-          print('Node not found for member: ${member.name}');
-        }
-        continue;
+    // Paint for spousal relationships - dashed line in red
+    final Paint spousePaint =
+        Paint()
+          ..color = Colors.red
+          ..strokeWidth = 2
+          ..style = PaintingStyle.stroke;
+
+    // Paint for parent-child relationships
+    final Paint parentChildPaint =
+        Paint()
+          ..color = Colors.green
+          ..strokeWidth = 2
+          ..style = PaintingStyle.stroke;
+
+    // Connect grandparents to father - ensuring proper hierarchy
+    for (var grandfather in grandfathers) {
+      final gfNode = nodeMap['${grandfather.fromPersonId}_${grandfather.name}'];
+      if (gfNode != null && fatherNode != null) {
+        graph.addEdge(gfNode, fatherNode, paint: parentChildPaint);
       }
+    }
 
-      if (kDebugMode) {
-        print(
-          'Processing relationships for member: ${member.name} with type: ${member.relationshipType}',
-        );
+    for (var grandmother in grandmothers) {
+      final gmNode = nodeMap['${grandmother.fromPersonId}_${grandmother.name}'];
+      if (gmNode != null && fatherNode != null) {
+        graph.addEdge(gmNode, fatherNode, paint: parentChildPaint);
       }
+    }
 
-      // Add edges based on relationship type
-      final relationshipType = member.relationshipType.toLowerCase();
-      if (relationshipType == 'эцэг' || relationshipType == 'father') {
-        // Father to child relationship (inheritance)
-        graph.addEdge(fromNode, rootNode);
-      } else if (relationshipType == 'эх' || relationshipType == 'mother') {
-        // Mother to child relationship
-        graph.addEdge(fromNode, rootNode);
-      } else if (relationshipType == 'хүүхэд' ||
-          relationshipType == 'children') {
-        // Child to parent relationship
-        graph.addEdge(rootNode, fromNode);
-      } else if (relationshipType == 'ах' ||
-          relationshipType == 'brothers' ||
-          relationshipType == 'эгч' ||
-          relationshipType == 'sisters' ||
-          relationshipType == 'дүү' ||
-          relationshipType == 'youngsiblings') {
-        // Sibling relationships
-        if (fatherNode != null) {
-          graph.addEdge(fatherNode, fromNode);
-        }
-      } else if (relationshipType == 'гэр бүл' ||
-          relationshipType == 'spouse') {
-        // Spouse relationship
-        graph.addEdge(rootNode, fromNode);
-      } else if (relationshipType == 'өвөө' ||
-          relationshipType == 'grandfather' ||
-          relationshipType == 'эмээ' ||
-          relationshipType == 'grandmother') {
-        // Grandparent relationships
-        if (fatherNode != null) {
-          graph.addEdge(fromNode, fatherNode);
+    // Connect parents to self
+    if (fatherNode != null) {
+      graph.addEdge(fatherNode, rootNode, paint: parentChildPaint);
+    }
+
+    if (motherNode != null) {
+      graph.addEdge(motherNode, rootNode, paint: parentChildPaint);
+    }
+
+    // Connect siblings - they should all connect to the same parent as self
+    Node? parentForSiblings = fatherNode ?? motherNode;
+    if (parentForSiblings != null) {
+      for (var sibling in siblings) {
+        final siblingNode = nodeMap['${sibling.fromPersonId}_${sibling.name}'];
+        if (siblingNode != null) {
+          graph.addEdge(
+            parentForSiblings,
+            siblingNode,
+            paint: parentChildPaint,
+          );
         }
       }
+    } else {
+      // If no parents, create connections between siblings and root
+      for (var sibling in siblings) {
+        final siblingNode = nodeMap['${sibling.fromPersonId}_${sibling.name}'];
+        if (siblingNode != null) {
+          graph.addEdge(
+            rootNode,
+            siblingNode,
+            paint: Paint()..color = Colors.teal,
+          );
+        }
+      }
+    }
+
+    // Connect children
+    for (var child in children) {
+      final childNode = nodeMap['${child.fromPersonId}_${child.name}'];
+      if (childNode != null) {
+        graph.addEdge(rootNode, childNode, paint: parentChildPaint);
+      }
+    }
+
+    // Connect spouses
+    for (var spouse in spouses) {
+      final spouseNode = nodeMap['${spouse.fromPersonId}_${spouse.name}'];
+      if (spouseNode != null) {
+        graph.addEdge(rootNode, spouseNode, paint: spousePaint);
+      }
+    }
+
+    // Connect father and mother as spouses
+    if (fatherNode != null && motherNode != null) {
+      graph.addEdge(fatherNode, motherNode, paint: spousePaint);
+    }
+
+    // Connect grandfather and grandmother as spouses
+    if (grandfatherNode != null && grandmotherNode != null) {
+      graph.addEdge(grandfatherNode, grandmotherNode, paint: spousePaint);
     }
 
     if (kDebugMode) {
@@ -203,6 +285,52 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          // Add refresh button
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.green),
+            onPressed: () {
+              setState(() {
+                isLoading = true;
+              });
+              _loadFamilyMembers();
+            },
+          ),
+          // Add help button to explain relationship colors
+          IconButton(
+            icon: const Icon(Icons.help_outline, color: Colors.green),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text('Харилцаа холбооны тайлбар'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('🟢 Ногоон зураас - Эцэг эх, хүүхдийн холбоо'),
+                          Text('🔴 Улаан зураас - Гэр бүлийн холбоо'),
+                          Text('🟣 Ягаан хүрээ - Өөрөө'),
+                          Text('🔵 Цэнхэр хүрээ - Эцэг'),
+                          Text('🩷 Ягаан хүрээ - Эх'),
+                          Text('🟤 Бор хүрээ - Өвөө'),
+                          Text('🟣 Нил ягаан хүрээ - Эмээ'),
+                          Text('🟢 Ногоон хүрээ - Ах, эгч, дүү'),
+                          Text('🟠 Улбар шар хүрээ - Хүүхэд'),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+              );
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -212,7 +340,13 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
               builder:
                   (context) => AddPersonForm(authService: widget.authService),
             ),
-          );
+          ).then((_) {
+            // Reload when returning from add person form
+            setState(() {
+              isLoading = true;
+            });
+            _loadFamilyMembers();
+          });
         },
         backgroundColor: Colors.green,
         child: const Icon(Icons.person_add),
@@ -227,10 +361,7 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
                 maxScale: 5.0,
                 child: GraphView(
                   graph: graph,
-                  algorithm: BuchheimWalkerAlgorithm(
-                    builder,
-                    TreeEdgeRenderer(builder),
-                  ),
+                  algorithm: SugiyamaAlgorithm(builder),
                   paint:
                       Paint()
                         ..color = Colors.green
@@ -275,12 +406,50 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
       }
     }
 
+    // Determine color based on relationship type
+    Color getBorderColor(String relationType) {
+      switch (relationType.toLowerCase()) {
+        case 'өөрөө':
+          return Colors.deepPurple;
+        case 'эцэг':
+        case 'father':
+          return Colors.blue;
+        case 'эх':
+        case 'mother':
+          return Colors.pink;
+        case 'өвөө':
+        case 'grandfather':
+          return Colors.brown;
+        case 'эмээ':
+        case 'grandmother':
+          return Colors.purple;
+        case 'ах':
+        case 'brothers':
+        case 'эгч':
+        case 'sisters':
+        case 'дүү':
+        case 'youngsiblings':
+          return Colors.teal;
+        case 'хүүхэд':
+        case 'children':
+          return Colors.orange;
+        case 'гэр бүл':
+        case 'spouse':
+          return Colors.red;
+        default:
+          return Colors.green;
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.green, width: 2),
+        border: Border.all(
+          color: getBorderColor(member.relationshipType),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),
@@ -295,7 +464,7 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
         children: [
           CircleAvatar(
             radius: 25,
-            backgroundColor: Colors.green,
+            backgroundColor: getBorderColor(member.relationshipType),
             child: Icon(
               member.gender == 'Эр' ? Icons.male : Icons.female,
               color: Colors.white,
