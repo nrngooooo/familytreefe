@@ -57,74 +57,131 @@ class _ProfileScreenState extends State<ProfileScreen> {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.green.shade700, Colors.green.shade500],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.green.shade800,
+            Colors.green.shade500,
+            Colors.green.shade400,
+          ],
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 7,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32.0),
+          padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.logout, color: Colors.white),
-                    onPressed: () async {
-                      final success = await widget.authService.logout();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              success
-                                  ? 'Амжилттай гарлаа'
-                                  : 'Гарах үед алдаа гарлаа',
-                            ),
-                            backgroundColor:
-                                success ? Colors.green : Colors.red,
-                          ),
-                        );
-                        if (success) {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder:
-                                  (_) => LoginScreen(
-                                    authService: widget.authService,
-                                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.logout, color: Colors.white),
+                      onPressed: () async {
+                        final success = await widget.authService.logout();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                success
+                                    ? 'Амжилттай гарлаа'
+                                    : 'Гарах үед алдаа гарлаа',
+                              ),
+                              backgroundColor:
+                                  success ? Colors.green : Colors.red,
                             ),
                           );
+                          if (success) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => LoginScreen(
+                                      authService: widget.authService,
+                                    ),
+                              ),
+                            );
+                          }
                         }
-                      }
-                    },
+                      },
+                    ),
                   ),
                 ],
               ),
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.white,
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
                 child: CircleAvatar(
-                  radius: 47,
-                  backgroundColor: Colors.grey[300],
-                  child: Icon(Icons.person, size: 50, color: Colors.grey[600]),
+                  radius: 55,
+                  backgroundColor: Colors.white,
+                  child: CircleAvatar(
+                    radius: 52,
+                    backgroundColor: Colors.grey[200],
+                    child: Icon(
+                      Icons.person,
+                      size: 55,
+                      color: Colors.green.shade700,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Text(
                 profile!['username'],
                 style: const TextStyle(
-                  fontSize: 24,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
+                  letterSpacing: 0.5,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 5.0,
+                      color: Color.fromARGB(80, 0, 0, 0),
+                      offset: Offset(0, 1),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                profile!['email'],
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white.withOpacity(0.9),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  profile!['email'],
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.95),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
@@ -137,9 +194,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileInfo() {
     return Card(
       elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       margin: const EdgeInsets.symmetric(vertical: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.grey.shade50],
+          ),
+        ),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -148,32 +214,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 const Text(
                   'Хувь хүний мэдээлэл',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => EditProfilePage(
-                              authService: widget.authService,
-                              profile: profile!,
-                            ),
-                      ),
-                    );
-                    if (result == true) {
-                      await _loadProfile();
-                    }
-                  },
-                  icon: Icon(
-                    profile!['person'] == null ? Icons.add : Icons.edit,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                     color: Colors.green,
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => EditProfilePage(
+                                authService: widget.authService,
+                                profile: profile!,
+                              ),
+                        ),
+                      );
+                      if (result == true) {
+                        await _loadProfile();
+                      }
+                    },
+                    icon: Icon(
+                      profile!['person'] == null ? Icons.add : Icons.edit,
+                      color: Colors.green,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const Divider(color: Colors.green, thickness: 1, height: 30),
             if (profile!['person'] != null)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,10 +270,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               )
             else
-              const Center(
-                child: Text(
-                  "Хувь хүний мэдээлэл бүртгэгдээгүй.",
-                  style: TextStyle(fontStyle: FontStyle.italic),
+              Container(
+                padding: const EdgeInsets.all(20),
+                alignment: Alignment.center,
+                child: Column(
+                  children: [
+                    Icon(Icons.info_outline, size: 40, color: Colors.grey[400]),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Хувь хүний мэдээлэл бүртгэгдээгүй.",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],
@@ -208,22 +296,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.grey.withOpacity(0.05),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 100,
+              child: Text(
+                '$label:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                  fontSize: 16,
+                ),
               ),
             ),
-          ),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 16))),
-        ],
+            Expanded(
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: 16, height: 1.4),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -231,29 +332,102 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       body:
           isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Colors.green.shade600,
+                  ),
+                ),
+              )
               : profile == null
-              ? const Center(child: Text("Профайл ачааллахад алдаа гарлаа"))
+              ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Профайл ачааллахад алдаа гарлаа",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: _loadProfile,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text("Дахин оролдох"),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              )
               : Column(
                 children: [
                   _buildProfileHeader(),
                   Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16.0),
-                      child: _buildProfileInfo(),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildProfileInfo(),
+                        ),
+                      ),
                     ),
                   ),
-                  Padding(
+                  Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
-                    child: ElevatedButton(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 1,
+                          blurRadius: 5,
+                          offset: const Offset(0, -3),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.delete_forever),
+                      label: const Text(
+                        'Бүртгэл устгах',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       onPressed: () {
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: const Text('Бүртгэл устгах'),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              title: const Row(
+                                children: [
+                                  Icon(Icons.warning, color: Colors.red),
+                                  SizedBox(width: 10),
+                                  Text('Бүртгэл устгах'),
+                                ],
+                              ),
                               content: const Text(
                                 'Та өөрийн бүртгэлийг устгахдаа итгэлтэй байна уу? Энэ үйлдлийг буцаах боломжгүй.',
                               ),
@@ -264,19 +438,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Navigator.of(context).pop();
                                   },
                                 ),
-                                TextButton(
+                                ElevatedButton(
                                   child: const Text(
                                     'Устгах',
-                                    style: TextStyle(color: Colors.red),
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
                                   ),
                                   onPressed: () async {
                                     Navigator.of(context).pop();
                                     final success = await widget.authService
                                         .deleteUser(widget.uid);
                                     if (success && mounted) {
-                                      Navigator.of(
-                                        context,
-                                      ).pushReplacementNamed('/login');
+                                      Navigator.of(context).pushReplacement(
+                                        MaterialPageRoute(
+                                          builder:
+                                              (_) => LoginScreen(
+                                                authService: widget.authService,
+                                              ),
+                                        ),
+                                      );
                                     } else {
                                       ScaffoldMessenger.of(
                                         context,
@@ -297,12 +479,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                      child: const Text(
-                        'Бүртгэл устгах',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                        backgroundColor: Colors.red.shade600,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                   ),
