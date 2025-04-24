@@ -155,8 +155,7 @@ class AuthService {
     }
   }
 
-  // Logout method
-  Future<void> logout() async {
+  Future<bool> logout() async {
     if (_token != null) {
       try {
         final response = await http.post(
@@ -169,18 +168,24 @@ class AuthService {
 
         if (response.statusCode == 200) {
           await clearUserData();
+          return true;
         } else {
           if (kDebugMode) {
             print("Logout failed with status: ${response.statusCode}");
+            print("Response body: ${response.body}");
           }
+          return false;
         }
       } catch (e) {
         if (kDebugMode) {
           print("Logout error: $e");
         }
+        return false;
       }
+    } else {
+      await clearUserData(); // fallback clear
+      return true;
     }
-    await clearUserData();
   }
 
   Future<Map<String, dynamic>?> fetchProfile(String uid) async {

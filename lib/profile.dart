@@ -1,4 +1,5 @@
 import 'package:familytreefe/api/api_service.dart';
+import 'package:familytreefe/login.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'edit_profile_page.dart';
@@ -72,9 +73,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   IconButton(
                     icon: const Icon(Icons.logout, color: Colors.white),
                     onPressed: () async {
-                      await widget.authService.logout();
+                      final success = await widget.authService.logout();
                       if (mounted) {
-                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              success
+                                  ? 'Амжилттай гарлаа'
+                                  : 'Гарах үед алдаа гарлаа',
+                            ),
+                            backgroundColor:
+                                success ? Colors.green : Colors.red,
+                          ),
+                        );
+                        if (success) {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => LoginScreen(
+                                    authService: widget.authService,
+                                  ),
+                            ),
+                          );
+                        }
                       }
                     },
                   ),
