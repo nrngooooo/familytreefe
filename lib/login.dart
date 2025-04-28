@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   String errorMessage = '';
+  bool _obscurePassword = true;
 
   // Function to handle login
   Future<void> login() async {
@@ -30,7 +31,12 @@ class _LoginScreenState extends State<LoginScreen> {
       usernameController.text, // Using usernameController now
       passwordController.text,
     );
-
+    if (usernameController.text.isEmpty || passwordController.text.isEmpty) {
+      setState(() {
+        errorMessage = 'Нэр болон нууц үгээ оруулна уу.';
+      });
+      return;
+    }
     setState(() {
       isLoading = false;
     });
@@ -102,11 +108,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: TextField(
                   controller: passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.lock, color: Colors.black),
-                    hintText: 'Нууц үг',
-                    border: InputBorder.none,
+                  obscureText: _obscurePassword,
+                  onSubmitted: (_) => login(), // Enter дарахад нэвтэрнэ
+                  decoration: InputDecoration(
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ),
