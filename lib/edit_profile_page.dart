@@ -179,7 +179,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  shadowColor: Colors.green.withOpacity(0.4),
+                  shadowColor: Colors.green.withAlpha((0.4 * 255).round()),
                   child: Container(
                     padding: const EdgeInsets.all(24.0),
                     decoration: BoxDecoration(
@@ -444,7 +444,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 3,
-                      shadowColor: Colors.green.withOpacity(0.5),
+                      shadowColor: Colors.green.withAlpha((0.5 * 255).round()),
                     ),
                   ),
                 ),

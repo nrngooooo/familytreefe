@@ -67,7 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withAlpha((0.5 * 255).round()),
             spreadRadius: 2,
             blurRadius: 7,
             offset: const Offset(0, 3),
@@ -84,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withAlpha((0.2 * 255).round()),
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: IconButton(
@@ -127,7 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   border: Border.all(color: Colors.white, width: 3),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withAlpha((0.2 * 255).round()),
                       spreadRadius: 2,
                       blurRadius: 8,
                       offset: const Offset(0, 2),
@@ -172,14 +172,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withAlpha((0.2 * 255).round()),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   profile!['email'],
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white.withOpacity(0.95),
+                    color: Colors.white.withAlpha((0.95 * 255).round()),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -222,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.green.withAlpha((0.1 * 255).round()),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
@@ -301,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: Colors.grey.withOpacity(0.05),
+          color: Colors.grey.withAlpha((0.05 * 255).round()),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -397,7 +397,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
+                          color: Colors.grey.withAlpha((0.3 * 255).round()),
                           spreadRadius: 1,
                           blurRadius: 5,
                           offset: const Offset(0, -3),
@@ -439,10 +439,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   },
                                 ),
                                 ElevatedButton(
-                                  child: const Text(
-                                    'Устгах',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red,
                                   ),
@@ -472,6 +468,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       );
                                     }
                                   },
+                                  child: const Text(
+                                    'Устгах',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                 ),
                               ],
                             );

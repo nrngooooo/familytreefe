@@ -6,8 +6,11 @@ class AddPersonForm extends StatefulWidget {
   final AuthService authService;
   final Function? onPersonAdded;
 
-  const AddPersonForm({Key? key, required this.authService, this.onPersonAdded})
-    : super(key: key);
+  const AddPersonForm({
+    super.key,
+    required this.authService,
+    this.onPersonAdded,
+  });
 
   @override
   _AddPersonFormState createState() => _AddPersonFormState();

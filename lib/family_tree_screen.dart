@@ -128,10 +128,6 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
     }
 
     // Find key family members
-    FamilyMember? self = members.firstWhere(
-      (m) => m.relationshipType.toLowerCase() == 'өөрөө',
-      orElse: () => members.first,
-    );
 
     List<FamilyMember> fathers =
         relationshipGroups['эцэг'] ?? relationshipGroups['father'] ?? [];
@@ -452,7 +448,7 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withAlpha((0.5 * 255).round()),
             spreadRadius: 2,
             blurRadius: 5,
             offset: const Offset(0, 3),
